@@ -1,6 +1,7 @@
 // Builds dist-demo/: a self-contained copy of dist/ for showing the site
 // anywhere (shared link, USB stick, sub-folder) without the real domain.
 // - every internal URL becomes relative and points to an explicit index.html;
+// - every page is marked noindex (the demo must stay out of search engines);
 // - /admin runs Sveltia CMS on its "test-repo" backend, pre-filled with the
 //   demo content (seed): editors can try everything; changes stay in their
 //   own browser. The "Effectifs" board shares that same sandbox.
@@ -57,6 +58,9 @@ for (const f of fichiers(OUT)) {
     // Calendar files (.ics) are not served by every demo host: drop those links.
     html = html.replace(/<a [^>]*href="[^"]*\.ics"[^>]*>[\s\S]*?<\/a>/g, '');
     if (rel === 'index.html') html = html.replace(/<title>[^<]*<\/title>/, '<title>Démo site BBF</title>');
+    // The demo must never appear in search engines: noindex on every page
+    // (a robots.txt in a sub-folder, as on GitHub Pages, is ignored by crawlers).
+    html = html.replace(/<meta name="robots"[^>]*>\s*/g, '').replace(/(<meta charset="utf-8"\s*\/?>)/i, '$1<meta name="robots" content="noindex, nofollow, noarchive" />');
     writeFileSync(f, html);
   } else if (f.endsWith('.css')) {
     const css = renommer(readFileSync(f, 'utf8')).replace(/url\((['"]?)(\/[^)'"]+)\1\)/g, (m, q, u) => (estInterne(u) ? `url(${q}${posix.relative(posix.dirname(rel), u.slice(1))}${q})` : m));
@@ -65,6 +69,8 @@ for (const f of fichiers(OUT)) {
 }
 
 for (const f of fichiers(OUT)) if (f.endsWith('.ics')) rmSync(f);
+for (const f of ['sitemap-index.xml', 'sitemap-0.xml']) rmSync(join(OUT, f), { force: true });
+writeFileSync(join(OUT, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 
 // Sandbox admin: Sveltia's in-memory test backend, no GitHub account needed.
 // The config is shipped as JSON, a type every static host serves.
