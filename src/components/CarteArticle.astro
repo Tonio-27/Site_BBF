@@ -1,0 +1,18 @@
+---
+import { Image } from 'astro:assets';
+import type { Article } from '../lib/contenu.ts';
+import { dateLongue, iso } from '../lib/dates.ts';
+import imageDefaut from '../assets/uploads/partage-defaut.jpg';
+interface Props { article: Article; titreNiveau?: 'h2' | 'h3' }
+const { article, titreNiveau: T = 'h3' } = Astro.props;
+const d = article.data;
+---
+<article class="carte">
+  <Image src={d.image?.src ?? imageDefaut} alt="" width={640} widths={[400, 640, 960]} sizes="(min-width: 60rem) 22rem, 100vw" loading="lazy" />
+  <div class="carte__corps">
+    <div><span class="etiquette">{d.categorie}</span></div>
+    <T class="carte__titre"><a href={`/${d.slug}/`}>{d.titre}</a></T>
+    <p class="carte__meta"><time datetime={iso(d.date)}>{dateLongue(d.date)}</time></p>
+    <p>{d.resume}</p>
+  </div>
+</article>

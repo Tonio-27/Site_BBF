@@ -1,0 +1,17 @@
+---
+import { annonceVisible } from '../lib/contenu.ts';
+const annonce = await annonceVisible();
+---
+{annonce && (
+  <div class="annonce" role="region" aria-label="Annonce">
+    <div class="conteneur">
+      {annonce.lien ? <a href={annonce.lien}>{annonce.texte} <span aria-hidden="true">→</span></a> : <p>{annonce.texte}</p>}
+    </div>
+  </div>
+)}
+<style>
+  .annonce { background: var(--rouge); color: var(--blanc); text-align: center; font-weight: 700; font-size: 0.95rem; }
+  .annonce a, .annonce p { color: var(--blanc); display: block; padding: 0.6rem 0; margin: 0; text-decoration: none; }
+  .annonce a:hover { text-decoration: underline; color: var(--blanc); }
+  .annonce :focus-visible { outline-color: var(--blanc); }
+</style>

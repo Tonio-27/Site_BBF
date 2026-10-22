@@ -1,0 +1,56 @@
+---
+import { getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import { partenairesActifs } from '../lib/contenu.ts';
+import { CATEGORIES_PARTENAIRE } from '../lib/schemas.ts';
+
+const page = (await getEntry('page_partenaires', 'partenaires'))!.data;
+const partenaires = await partenairesActifs();
+const categories = CATEGORIES_PARTENAIRE.map((c) => ({ c, liste: partenaires.filter((p) => p.data.categorie === c) })).filter((x) => x.liste.length);
+---
+<Base titre="Partenaires" description="Les partenaires et sponsors du Brass Band Fribourg, et comment nous soutenir.">
+  <BandeauPage titre="Partenaires" surtitre="Merci !" intro={page.remerciements} />
+  {categories.map(({ c, liste }, i) => (
+    <section class:list={['section', { 'section--gris': i % 2 }]} aria-labelledby={`cat-${i}`}>
+      <div class="conteneur">
+        <h2 id={`cat-${i}`}>{c === 'Partenaire principal' ? 'Partenaires principaux' : `${c}s`}</h2>
+        <ul class="logos">
+          {liste.map((p) => (
+            <li>
+              {p.data.site_web ? (
+                <a href={p.data.site_web} rel="noopener"><Image src={p.data.logo} alt={p.data.nom} width={240} height={120} loading="lazy" /></a>
+              ) : (
+                <Image src={p.data.logo} alt={p.data.nom} width={240} height={120} loading="lazy" />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ))}
+  <section class="section section--noir" id="soutenir" aria-labelledby="t-soutenir">
+    <div class="conteneur">
+      <p class="surtitre">Nous soutenir</p>
+      <h2 id="t-soutenir">Rejoignez nos soutiens</h2>
+      <div class="offres">
+        {page.offres.map((o) => (
+          <div class="offre">
+            <h3>{o.titre}</h3>
+            <p>{o.texte}</p>
+            {o.pdf ? <a class="bouton" href={o.pdf} download>Télécharger le dossier (PDF)</a> : <a class="bouton" href="/contact/">Nous contacter</a>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .logos { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+  .logos li { background: var(--blanc); border-radius: var(--rayon-lg); padding: var(--e-3); box-shadow: var(--ombre); }
+  .logos a { display: block; }
+  .offres { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); margin-top: var(--e-4); }
+  .offre { border: 1px solid var(--gris-fonce); border-top: 4px solid var(--rouge); border-radius: var(--rayon-lg); padding: var(--e-4); }
+  .offre p { color: #d6d6d6; }
+</style>

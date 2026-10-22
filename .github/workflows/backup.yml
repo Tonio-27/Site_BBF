@@ -1,0 +1,65 @@
+# Backups: a full archive (git bundle + readable content) to Infomaniak every
+# night (30 kept) and to the BBF shared Google Drive every week (12 kept).
+name: Sauvegardes
+
+on:
+  schedule:
+    - cron: '17 3 * * *' # 04:17 Swiss winter time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Création de l'archive
+        run: |
+          stamp=$(date -u +%Y-%m-%d)
+          mkdir -p "backup/site-web-$stamp/contenu"
+          git bundle create "backup/site-web-$stamp/depot-complet.bundle" --all
+          cp -r src/content src/assets/uploads public/documents "backup/site-web-$stamp/contenu/"
+          cat > "backup/site-web-$stamp/LISEZMOI.txt" <<'TXT'
+          Sauvegarde du site du Brass Band Fribourg.
+          - contenu/ : textes (Markdown, JSON), photos et PDF, lisibles sans outil technique.
+          - depot-complet.bundle : historique complet. Restauration : git clone depot-complet.bundle site-web
+          Procédure détaillée : docs/RUNBOOK.md
+          TXT
+          tar -C backup -czf "site-web-$stamp.tar.gz" "site-web-$stamp"
+          echo "ARCHIVE=site-web-$stamp.tar.gz" >> "$GITHUB_ENV"
+      - name: Envoi chez Infomaniak (30 dernières)
+        env:
+          HAS_KEY: ${{ secrets.INFOMANIAK_SSH_KEY != '' }}
+          SSH_KEY: ${{ secrets.INFOMANIAK_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.INFOMANIAK_KNOWN_HOSTS }}
+          HOST: ${{ secrets.INFOMANIAK_HOST }}
+          USER: ${{ secrets.INFOMANIAK_USER }}
+        run: |
+          if [ "$HAS_KEY" != "true" ]; then echo "::notice::Secrets Infomaniak absents : envoi ignoré."; exit 0; fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh "$USER@$HOST" 'mkdir -p ~/backups/site-web'
+          scp "$ARCHIVE" "$USER@$HOST:backups/site-web/"
+          ssh "$USER@$HOST" 'cd ~/backups/site-web && ls -1t site-web-*.tar.gz | tail -n +31 | xargs -r rm --'
+          rm -f ~/.ssh/id_ed25519
+      - name: Envoi sur le Drive partagé (le lundi, 12 dernières)
+        env:
+          HAS_DRIVE: ${{ secrets.GDRIVE_SERVICE_ACCOUNT != '' }}
+          GDRIVE_SERVICE_ACCOUNT: ${{ secrets.GDRIVE_SERVICE_ACCOUNT }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          if [ "$HAS_DRIVE" != "true" ]; then echo "::notice::Compte de service Drive absent : envoi ignoré."; exit 0; fi
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(date -u +%u)" != "1" ]; then echo "Pas lundi : envoi hebdomadaire ignoré."; exit 0; fi
+          sudo apt-get install -y -qq rclone
+          printf '%s' "$GDRIVE_SERVICE_ACCOUNT" > sa.json
+          export RCLONE_CONFIG_DRIVE_TYPE=drive RCLONE_CONFIG_DRIVE_SCOPE=drive RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_FILE=sa.json RCLONE_CONFIG_DRIVE_ROOT_FOLDER_ID="$GDRIVE_FOLDER_ID"
+          rclone copy "$ARCHIVE" drive:
+          rclone lsf drive: --files-only | grep '^site-web-.*\.tar\.gz$' | sort -r | tail -n +13 | xargs -r -I{} rclone deletefile "drive:{}"
+          rm -f sa.json

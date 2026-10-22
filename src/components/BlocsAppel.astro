@@ -1,0 +1,31 @@
+---
+interface Props { rejoindre: string; soutenir: string; suivre: string; reseaux: { nom: string; url?: string }[] }
+const { rejoindre, soutenir, suivre, reseaux } = Astro.props;
+---
+<div class="appels">
+  <section class="appel" aria-labelledby="appel-rejoindre">
+    <h2 id="appel-rejoindre">Nous rejoindre</h2>
+    <p>{rejoindre}</p>
+    <a class="bouton" href="/contact/">Prendre contact</a>
+  </section>
+  <section class="appel" aria-labelledby="appel-soutenir">
+    <h2 id="appel-soutenir">Nous soutenir</h2>
+    <p>{soutenir}</p>
+    <a class="bouton" href="/partenaires/">Devenir membre ami</a>
+  </section>
+  <section class="appel" aria-labelledby="appel-suivre">
+    <h2 id="appel-suivre">Nous suivre</h2>
+    <p>{suivre}</p>
+    <ul class="appel__reseaux">
+      {reseaux.filter((x) => x.url).map((x) => <li><a class="bouton bouton--contour" href={x.url} rel="noopener">{x.nom}</a></li>)}
+    </ul>
+  </section>
+</div>
+<style>
+  .appels { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+  .appel { border-top: 4px solid var(--rouge); padding-top: var(--e-4); display: flex; flex-direction: column; align-items: flex-start; }
+  .appel h2 { font-size: var(--t-xl); }
+  .appel p { flex: 1; color: #d6d6d6; }
+  .appel__reseaux { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--e-2); }
+  .appel__reseaux .bouton { padding: 0.5rem 0.9rem; font-size: 0.9rem; }
+</style>

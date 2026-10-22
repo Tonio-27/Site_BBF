@@ -1,0 +1,11 @@
+{
+  "titre": "Fête de la musique",
+  "date_debut": "2027-06-21T18:30",
+  "lieu": "Place Georges-Python",
+  "localite": "Fribourg",
+  "ensembles": [
+    "A"
+  ],
+  "type": "Prestation",
+  "annule": false
+}

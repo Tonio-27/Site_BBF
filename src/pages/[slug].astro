@@ -1,0 +1,69 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import CarteArticle from '../components/CarteArticle.astro';
+import { articlesPublies, slugCategorie, type Article } from '../lib/contenu.ts';
+import { dateLongue, iso } from '../lib/dates.ts';
+
+// Articles live at the root (/<slug>/) to keep the old WordPress URLs.
+export async function getStaticPaths() {
+  const articles = await articlesPublies();
+  return articles.map((article) => {
+    const lies = articles
+      .filter((a) => a.id !== article.id)
+      .sort((a, b) => Number(b.data.categorie === article.data.categorie) - Number(a.data.categorie === article.data.categorie))
+      .slice(0, 3);
+    return { params: { slug: article.data.slug }, props: { article, lies } };
+  });
+}
+const { article, lies } = Astro.props as { article: Article; lies: Article[] };
+const d = article.data;
+const { Content } = await render(article);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: d.titre,
+  datePublished: iso(d.date),
+  description: d.resume,
+  publisher: { '@type': 'Organization', name: 'Brass Band Fribourg' },
+  mainEntityOfPage: new URL(`/${d.slug}/`, Astro.site).href,
+};
+---
+<Base titre={d.titre} description={d.resume} image={d.image?.src} type="article" jsonld={jsonld}>
+  <article>
+    <header class="bandeau-page sur-noir">
+      <div class="conteneur-texte">
+        <p class="fil"><a href="/blog/">← Actualités</a></p>
+        <p class="meta"><a class="etiquette etiquette--rouge" href={`/blog/categorie/${slugCategorie(d.categorie)}/`}>{d.categorie}</a> <time datetime={iso(d.date)}>{dateLongue(d.date)}</time></p>
+        <h1>{d.titre}</h1>
+        <p>{d.resume}</p>
+      </div>
+    </header>
+    {d.image && (
+      <div class="conteneur image-article">
+        <Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 72rem) 72rem, 100vw" loading="eager" />
+      </div>
+    )}
+    <div class="conteneur-texte prose corps">
+      <Content />
+    </div>
+  </article>
+  {lies.length > 0 && (
+    <section class="section section--gris" aria-labelledby="lies">
+      <div class="conteneur">
+        <h2 id="lies">À lire aussi</h2>
+        <div class="grille">{lies.map((a) => <CarteArticle article={a} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>
+<style>
+  .meta { display: flex; gap: var(--e-3); align-items: center; font-size: var(--t-sm) !important; margin: 0 0 var(--e-3) !important; }
+  .meta a { text-decoration: none; }
+  .bandeau-page h1 { font-size: var(--t-2xl); }
+  .image-article { margin-top: calc(-1 * var(--e-4)); }
+  .image-article :global(img) { border-radius: var(--rayon-lg); width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .corps { padding-block: var(--e-5); font-size: 1.1rem; }
+  .section--gris { margin-top: var(--e-5); }
+</style>

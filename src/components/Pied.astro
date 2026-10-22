@@ -1,0 +1,61 @@
+---
+import Logo from './Logo.astro';
+import Email from './Email.astro';
+import { reglages } from '../lib/contenu.ts';
+const r = await reglages();
+const annee = new Date().getFullYear();
+const reseaux = [
+  { nom: 'Facebook', url: r.facebook },
+  { nom: 'Instagram', url: r.instagram },
+  { nom: 'YouTube', url: r.youtube },
+].filter((x) => x.url);
+---
+<footer class="pied sur-noir">
+  <div class="conteneur pied__grille">
+    <div>
+      <a href="/" class="pied__logo"><Logo /><span class="visuellement-cache">Accueil</span></a>
+      <address>{r.adresse.split('\n').map((l) => <>{l}<br /></>)}</address>
+      <p><Email adresse={r.email_general} /></p>
+    </div>
+    <nav aria-label="Liens utiles">
+      <h2 class="pied__titre">Le BBF</h2>
+      <ul>
+        <li><a href="/agenda/">Agenda</a></li>
+        <li><a href="/presentation/">Présentation</a></li>
+        <li><a href="/partenaires/">Nous soutenir</a></li>
+        <li><a href="/presse/">Presse</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Réseaux sociaux">
+      <h2 class="pied__titre">Nous suivre</h2>
+      <ul>
+        {reseaux.map((x) => <li><a href={x.url} rel="noopener">{x.nom}</a></li>)}
+        <li><a href="/blog/rss.xml">Flux RSS</a></li>
+        <li><a href="/agenda.ics">Agenda (calendrier)</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="conteneur pied__bas">
+    <p>© {annee} {r.nom}</p>
+    <ul>
+      <li><a href="/politique-de-confidentialite/">Confidentialité</a></li>
+      <li><a href="/conditions-generales/">Conditions générales</a></li>
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .pied { background: var(--noir); color: #d6d6d6; padding-top: var(--e-6); margin-top: var(--e-6); font-size: 0.95rem; }
+  .pied :global(a) { color: var(--blanc); }
+  .pied :global(a:hover) { color: var(--rouge-clair); }
+  .pied__grille { display: grid; gap: var(--e-5); grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+  .pied__logo { display: block; color: var(--blanc); margin-bottom: var(--e-3); }
+  .pied__logo :global(.logo) { width: 12rem; }
+  address { font-style: normal; margin-bottom: var(--e-3); }
+  .pied__titre { font-size: var(--t-sm); text-transform: uppercase; letter-spacing: .12em; color: var(--rouge-clair); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-2); }
+  .pied__bas { border-top: 1px solid var(--gris-fonce); margin-top: var(--e-5); padding-block: var(--e-4); display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--e-3); font-size: var(--t-sm); }
+  .pied__bas p { margin: 0; }
+  .pied__bas ul { display: flex; gap: var(--e-4); }
+</style>

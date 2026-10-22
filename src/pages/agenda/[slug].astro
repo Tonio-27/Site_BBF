@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import { evenements, type Evenement } from '../../lib/contenu.ts';
+import { dateComplete, heure, aUneHeure, iso, jourIso } from '../../lib/dates.ts';
+import { libelleEnsembles, estAVenir } from '../../lib/evenements.ts';
+import { renderMarkdown } from '../../lib/markdown.ts';
+
+export async function getStaticPaths() {
+  return (await evenements()).map((evt) => ({ params: { slug: evt.id }, props: { evt } }));
+}
+const { evt } = Astro.props as { evt: Evenement };
+const d = evt.data;
+const description = d.description ? await renderMarkdown(d.description) : '';
+const memeJour = !d.date_fin || jourIso(d.date_fin) === jourIso(d.date_debut);
+const avenir = estAVenir(d);
+
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'Event',
+  name: d.titre,
+  startDate: aUneHeure(d.date_debut) ? iso(d.date_debut) : jourIso(d.date_debut),
+  ...(d.date_fin && { endDate: aUneHeure(d.date_fin) ? iso(d.date_fin) : jourIso(d.date_fin) }),
+  eventStatus: d.annule ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
+  eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  location: { '@type': 'Place', name: d.lieu, address: { '@type': 'PostalAddress', addressLocality: d.localite, addressCountry: 'CH' } },
+  performer: { '@type': 'MusicGroup', name: `Brass Band Fribourg — ${libelleEnsembles(d.ensembles)}` },
+  organizer: { '@type': 'MusicGroup', name: 'Brass Band Fribourg', url: Astro.site?.href },
+  ...(d.billetterie_url && { offers: { '@type': 'Offer', url: d.billetterie_url } }),
+};
+const resume = `${d.type} — ${dateComplete(d.date_debut)}, ${d.lieu}, ${d.localite}.`;
+---
+<Base titre={d.titre} description={resume} image={d.image?.src} jsonld={jsonld}>
+  <BandeauPage titre={d.titre} surtitre={`${d.type} · ${libelleEnsembles(d.ensembles)}`} fil={avenir ? { href: '/agenda/', label: 'Agenda' } : { href: '/agenda/archives/', label: 'Événements passés' }}>
+    {d.annule && <p class="annule"><span class="etiquette etiquette--rouge">Annulé</span> Cet événement n’aura pas lieu.</p>}
+  </BandeauPage>
+  <section class="section">
+    <div class="conteneur detail">
+      <div class="detail__texte">
+        {d.image && <Image src={d.image.src} alt={d.image.alt} widths={[640, 960, 1280]} sizes="(min-width: 60rem) 40rem, 100vw" class="detail__image" />}
+        {description ? <div class="prose" set:html={description} /> : <p>Plus d’informations prochainement.</p>}
+      </div>
+      <aside class="detail__infos" aria-label="Informations pratiques">
+        <dl>
+          <dt>Date</dt>
+          <dd>
+            <time datetime={iso(d.date_debut)}>{dateComplete(d.date_debut)}</time>
+            {d.date_fin && !memeJour && <> au <time datetime={iso(d.date_fin)}>{dateComplete(d.date_fin)}</time></>}
+          </dd>
+          {aUneHeure(d.date_debut) && <><dt>Heure</dt><dd>{heure(d.date_debut)}{d.date_fin && memeJour && aUneHeure(d.date_fin) && ` – ${heure(d.date_fin)}`}</dd></>}
+          <dt>Lieu</dt>
+          <dd>{d.lieu}<br />{d.localite}</dd>
+          <dt>Formation</dt>
+          <dd>{libelleEnsembles(d.ensembles)}</dd>
+        </dl>
+        <div class="detail__actions">
+          {d.billetterie_url && !d.annule && avenir && <a class="bouton" href={d.billetterie_url} rel="noopener">Réserver</a>}
+          {avenir && !d.annule && <a class="bouton bouton--contour" href={`/agenda/${evt.id}.ics`} download>Ajouter à mon calendrier</a>}
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+<style>
+  .detail { display: grid; gap: var(--e-5); grid-template-columns: 1fr; }
+  @media (min-width: 60rem) { .detail { grid-template-columns: 1fr 20rem; } }
+  .detail :global(.detail__image) { border-radius: var(--rayon-lg); margin-bottom: var(--e-4); width: 100%; }
+  .detail__infos { background: #f5f5f5; border-radius: var(--rayon-lg); padding: var(--e-4); align-self: start; border-top: 4px solid var(--rouge); }
+  dl { margin: 0 0 var(--e-4); }
+  dt { font-size: var(--t-sm); text-transform: uppercase; letter-spacing: .1em; color: var(--gris); font-weight: 700; }
+  dd { margin: 0 0 var(--e-3); font-weight: 600; }
+  .detail__actions { display: flex; flex-direction: column; gap: var(--e-2); }
+  .detail__actions .bouton { justify-content: center; }
+  .annule { margin-top: var(--e-3) !important; color: var(--blanc) !important; }
+</style>

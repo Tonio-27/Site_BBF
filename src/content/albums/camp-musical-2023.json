@@ -1,0 +1,39 @@
+{
+  "titre": "Camp musical 2023",
+  "date": "2023-08-14",
+  "ensemble": "Les deux",
+  "couverture": {
+    "src": "../../assets/uploads/album-camp-musical-2023-01.jpg",
+    "alt": "Camp musical 2023 : photo de couverture"
+  },
+  "photos": [
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-01.jpg",
+      "legende": "Camp musical 2023 — moment 1"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-02.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-03.jpg",
+      "legende": "Camp musical 2023 — moment 3"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-04.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-05.jpg",
+      "legende": "Camp musical 2023 — moment 5"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-06.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-07.jpg",
+      "legende": "Camp musical 2023 — moment 7"
+    },
+    {
+      "image": "../../assets/uploads/album-camp-musical-2023-08.jpg"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "prenom": "Pierre",
+  "nom": "Dupasquier",
+  "fonction": "Président",
+  "email": "president@brassbandfribourg.ch",
+  "afficher_telephone": false,
+  "ordre": 1
+}

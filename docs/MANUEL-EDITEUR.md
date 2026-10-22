@@ -1,0 +1,71 @@
+# Manuel de l'éditeur — site du Brass Band Fribourg
+
+Ce manuel explique comment modifier le site. Aucune connaissance technique n'est nécessaire. Comptez **moins de 5 minutes** pour publier un article.
+
+> Les captures d'écran seront ajoutées après la mise en place des comptes (phase 4).
+
+## 1. Une seule fois : créer votre accès
+
+1. Vous recevez un e-mail « invitation to join brassbandfribourg ».
+2. Cliquez sur le lien et créez un compte gratuit sur **GitHub** (c'est le service qui conserve le contenu du site). Choisissez un mot de passe solide.
+3. Activez la **double authentification** quand elle vous est demandée (application sur téléphone). Gardez précieusement les codes de secours.
+4. Acceptez l'invitation. C'est tout : vous n'aurez plus jamais besoin d'aller sur ce site.
+
+## 2. Se connecter
+
+1. Ouvrez **brassbandfribourg.ch/admin**.
+2. Cliquez sur **« Se connecter avec GitHub »**, puis autorisez l'accès la première fois.
+3. Le menu de gauche affiche : Actualités, Agenda, Musiciens, Directeurs, Comité, Photos, Partenaires, Presse, Pages, Réglages.
+
+Chaque fois que vous cliquez sur **Enregistrer**, le site est mis à jour automatiquement en **moins de 3 minutes**.
+
+## 3. Les tâches courantes
+
+### Publier un article
+1. **Actualités → Nouveau**.
+2. Remplissez : titre, adresse (ex. `concert-annuel-2027`), date, catégorie, résumé (2 phrases).
+3. Image de couverture : glissez la photo, puis **décrivez-la en quelques mots** (pour les personnes malvoyantes).
+4. Écrivez le texte. Pour une vidéo YouTube : collez simplement son adresse seule sur une ligne.
+5. **Enregistrer**. Pour préparer sans publier : cochez **Brouillon**.
+
+### Ajouter un événement
+1. **Agenda → Nouveau**.
+2. Titre, début (date et heure), lieu (ex. « 2M2C »), localité (ex. « Montreux »), formation(s), type.
+3. Facultatif : fin, description, lien de billetterie (affiche un bouton « Réserver »).
+4. Un concert passé part **tout seul** dans les archives le lendemain : ne le supprimez pas.
+5. Concert annulé ? Cochez **Annulé** plutôt que de supprimer.
+
+### Ajouter, modifier ou retirer un musicien
+1. **Musiciens** : la liste est groupée par formation et pupitre.
+2. **Nouveau** : prénom, nom, formation, pupitre. L'ordre d'affichage est automatique.
+3. Un musicien quitte le BBF : décochez **Actif** (sa fiche est conservée).
+
+### Créer un album photo
+1. **Photos → Nouveau** : titre, date, formation, photo de couverture (+ description).
+2. Dans **Photos**, ajoutez les images (plusieurs d'un coup possible). **60 au maximum** : l'album complet va sur le Drive du BBF, indiquez son lien dans « Lien vers l'album complet ».
+
+### Changer le logo d'un partenaire
+**Partenaires** → choisir le partenaire → remplacer le logo → Enregistrer. Pour retirer un partenaire : décocher **Actif**.
+
+### Afficher le bandeau d'annonce
+**Réglages → Réglages du site** : cochez « Afficher le bandeau », écrivez le texte, le lien et la date après laquelle il doit disparaître.
+
+## 4. Photos : formats conseillés
+
+| Usage | Format | Taille minimale |
+| --- | --- | --- |
+| Grande photo d'accueil | Paysage | 2000 px de large |
+| Couverture d'article ou d'album | Paysage | 1600 px de large |
+| Portrait de directeur | Portrait | 800 px de large |
+| Logo partenaire | SVG ou PNG fond transparent | 400 px de large |
+
+Pas besoin de réduire vos photos : l'admin les redimensionne et les compresse automatiquement.
+
+## 5. Ça ne s'affiche pas ?
+
+1. **Attendez 3 minutes** puis rechargez la page (sur ordinateur : Ctrl + Maj + R, sur Mac : Cmd + Maj + R).
+2. Vérifiez que l'article n'est pas en **Brouillon**.
+3. Pour un événement : vérifiez la date (un événement passé est dans « Événements passés »).
+4. Toujours rien ? Un champ obligatoire est probablement vide ou invalide : le site refuse alors de se mettre à jour **pour ne rien casser**, et l'ancienne version reste en ligne. Prévenez un administrateur (voir PASSATION.md), qui verra l'erreur exacte.
+
+Vous avez supprimé quelque chose par erreur ? Pas de panique : **tout est récupérable** par un administrateur.

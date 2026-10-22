@@ -1,0 +1,12 @@
+{
+  "titre": "Fête cantonale des musiques",
+  "date_debut": "2026-05-09",
+  "date_fin": "2026-05-10",
+  "lieu": "Halle des fêtes",
+  "localite": "Bulle",
+  "ensembles": [
+    "B"
+  ],
+  "type": "Concours",
+  "annule": false
+}

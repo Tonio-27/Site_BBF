@@ -1,0 +1,39 @@
+{
+  "titre": "Fête cantonale 2024",
+  "date": "2024-05-11",
+  "ensemble": "B",
+  "couverture": {
+    "src": "../../assets/uploads/album-fete-cantonale-2024-01.jpg",
+    "alt": "Fête cantonale 2024 : photo de couverture"
+  },
+  "photos": [
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-01.jpg",
+      "legende": "Fête cantonale 2024 — moment 1"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-02.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-03.jpg",
+      "legende": "Fête cantonale 2024 — moment 3"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-04.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-05.jpg",
+      "legende": "Fête cantonale 2024 — moment 5"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-06.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-07.jpg",
+      "legende": "Fête cantonale 2024 — moment 7"
+    },
+    {
+      "image": "../../assets/uploads/album-fete-cantonale-2024-08.jpg"
+    }
+  ]
+}

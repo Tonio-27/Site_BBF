@@ -1,0 +1,119 @@
+---
+import { getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import EvtItem from '../components/EvtItem.astro';
+import CarteArticle from '../components/CarteArticle.astro';
+import BlocsAppel from '../components/BlocsAppel.astro';
+import { articlesPublies, evenements, partenairesActifs, reglages } from '../lib/contenu.ts';
+import { aVenir, pourEnsemble } from '../lib/evenements.ts';
+
+const accueil = (await getEntry('accueil', 'accueil'))!.data;
+const r = await reglages();
+const articles = (await articlesPublies()).slice(0, 3);
+const prochains = aVenir(await evenements());
+const ensembles = [
+  { cle: 'A' as const, nom: 'Formation A', evts: pourEnsemble(prochains, 'A').slice(0, 3) },
+  { cle: 'B' as const, nom: 'Formation B', evts: pourEnsemble(prochains, 'B').slice(0, 3) },
+];
+const partenaires = await partenairesActifs();
+---
+<Base titre="Accueil" description={r.description_seo}>
+  <section class="hero sur-noir" aria-labelledby="hero-titre">
+    <Image class="hero__image" src={accueil.photo.src} alt={accueil.photo.alt} widths={[640, 1024, 1600, 2400]} sizes="100vw" loading="eager" fetchpriority="high" />
+    <div class="hero__voile"></div>
+    <div class="conteneur hero__contenu">
+      <p class="surtitre">Brass Band Fribourg</p>
+      <h1 id="hero-titre">{accueil.accroche}</h1>
+      <p class="hero__intro">{accueil.introduction}</p>
+      <div class="hero__actions">
+        <a class="bouton" href="/agenda/">Voir l’agenda</a>
+        <a class="bouton bouton--contour" href="/presentation/">Découvrir le BBF</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--noir" aria-labelledby="titre-agenda">
+    <div class="conteneur">
+      <div class="entete-section">
+        <div>
+          <p class="surtitre">Agenda</p>
+          <h2 id="titre-agenda">Prochains événements</h2>
+        </div>
+        <a class="lien-fleche" href="/agenda/">Tout l’agenda</a>
+      </div>
+      <div class="deux-colonnes">
+        {ensembles.map((e) => (
+          <div>
+            <h3 class="colonne-titre">{e.nom}</h3>
+            {e.evts.length ? (
+              <ul class="evts">{e.evts.map((evt) => <EvtItem evt={evt} titreNiveau="h4" />)}</ul>
+            ) : (
+              <p class="vide">Aucun événement annoncé pour le moment. Revenez bientôt !</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="titre-actus">
+    <div class="conteneur">
+      <div class="entete-section">
+        <div>
+          <p class="surtitre">Actualités</p>
+          <h2 id="titre-actus">Les dernières nouvelles</h2>
+        </div>
+        <a class="lien-fleche" href="/blog/">Toutes les actualités</a>
+      </div>
+      <div class="grille">{articles.map((a) => <CarteArticle article={a} />)}</div>
+    </div>
+  </section>
+
+  <section class="section section--noir" aria-label="Nous rejoindre, nous soutenir, nous suivre">
+    <div class="conteneur">
+      <BlocsAppel
+        rejoindre={accueil.bloc_rejoindre}
+        soutenir={accueil.bloc_soutenir}
+        suivre={accueil.bloc_suivre}
+        reseaux={[{ nom: 'Facebook', url: r.facebook }, { nom: 'Instagram', url: r.instagram }, { nom: 'YouTube', url: r.youtube }]}
+      />
+    </div>
+  </section>
+
+  {partenaires.length > 0 && (
+    <section class="section partenaires" aria-labelledby="titre-partenaires">
+      <div class="conteneur">
+        <h2 id="titre-partenaires" class="partenaires__titre">Merci à nos partenaires</h2>
+        <ul class="partenaires__liste">
+          {partenaires.map((p) => (
+            <li>
+              <a href={p.data.site_web ?? '/partenaires/'} rel="noopener">
+                <Image src={p.data.logo} alt={p.data.nom} width={200} height={100} loading="lazy" />
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="partenaires__lien"><a class="lien-fleche" href="/partenaires/">Devenir partenaire</a></p>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .hero { position: relative; min-height: min(88vh, 46rem); display: flex; align-items: flex-end; background: var(--noir); color: var(--blanc); overflow: hidden; }
+  .hero :global(.hero__image) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero__voile { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.55) 45%, rgb(0 0 0 / 0.92) 100%); }
+  .hero__contenu { position: relative; padding-block: var(--e-7) var(--e-6); }
+  .hero h1 { font-size: var(--t-3xl); max-width: 16ch; }
+  .hero__intro { font-size: var(--t-lg); max-width: 38rem; color: #e6e6e6; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-4); }
+  .deux-colonnes { display: grid; gap: var(--e-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .colonne-titre { font-size: var(--t-lg); border-bottom: 1px solid var(--gris-fonce); padding-bottom: var(--e-2); }
+  .partenaires { padding-bottom: 0; }
+  .partenaires__titre { text-align: center; font-size: var(--t-lg); color: var(--gris); text-transform: uppercase; letter-spacing: .12em; }
+  .partenaires__liste { list-style: none; padding: 0; margin: var(--e-4) 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: var(--e-4); align-items: center; }
+  .partenaires__liste a { display: block; filter: grayscale(1); opacity: .8; transition: filter .15s, opacity .15s; }
+  .partenaires__liste a:hover, .partenaires__liste a:focus-visible { filter: none; opacity: 1; }
+  .partenaires__lien { text-align: center; margin-top: var(--e-4); }
+</style>

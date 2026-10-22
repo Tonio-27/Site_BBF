@@ -1,0 +1,13 @@
+{
+  "titre": "Concert de l'Avent",
+  "date_debut": "2026-12-13T17:00",
+  "lieu": "Cathédrale Saint-Nicolas",
+  "localite": "Fribourg",
+  "ensembles": [
+    "A",
+    "B"
+  ],
+  "type": "Concert",
+  "description": "Les deux formations réunies pour un concert de l'Avent dans la cathédrale.",
+  "annule": false
+}

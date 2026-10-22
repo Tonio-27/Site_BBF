@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Entete from '../components/Entete.astro';
+import Pied from '../components/Pied.astro';
+import Annonce from '../components/Annonce.astro';
+import BandeauBeta from '../components/BandeauBeta.astro';
+import { reglages } from '../lib/contenu.ts';
+
+interface Props {
+  titre: string;
+  description?: string;
+  image?: ImageMetadata;
+  type?: 'website' | 'article';
+  jsonld?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+}
+const { titre, description, image, type = 'website', jsonld, noindex = false } = Astro.props;
+const r = await reglages();
+const titreComplet = Astro.url.pathname === '/' ? `${r.nom} — ${titre}` : `${titre} | ${r.nom}`;
+const desc = description ?? r.description_seo;
+const canonique = new URL(Astro.url.pathname, Astro.site).href;
+const partage = await getImage({ src: image ?? r.image_partage, width: 1200, format: 'jpg' });
+const imageAbsolue = new URL(partage.src, Astro.site).href;
+
+const groupe = {
+  '@context': 'https://schema.org',
+  '@type': 'MusicGroup',
+  name: r.nom,
+  url: Astro.site?.href,
+  genre: 'Brass band',
+  email: r.email_general,
+  address: { '@type': 'PostalAddress', addressLocality: 'Fribourg', addressCountry: 'CH' },
+  sameAs: [r.facebook, r.instagram, r.youtube].filter(Boolean),
+};
+const blocsJsonld = [groupe, ...(jsonld ? (Array.isArray(jsonld) ? jsonld : [jsonld]) : [])];
+---
+<!doctype html>
+<html lang="fr-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonique} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={r.nom} />
+    <meta property="og:locale" content="fr_CH" />
+    <meta property="og:title" content={titre} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonique} />
+    <meta property="og:image" content={imageAbsolue} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="Actualités du BBF" href="/blog/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script src="/js/early.js" is:inline></script>
+    <script src="/js/site.js" defer is:inline></script>
+    {blocsJsonld.map((b) => <script type="application/ld+json" set:html={JSON.stringify(b)} />)}
+  </head>
+  <body>
+    <a class="evitement" href="#contenu">Aller au contenu</a>
+    <BandeauBeta />
+    <Annonce />
+    <Entete />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <Pied />
+  </body>
+</html>

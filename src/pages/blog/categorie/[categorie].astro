@@ -1,0 +1,24 @@
+---
+import Base from '../../../layouts/Base.astro';
+import BandeauPage from '../../../components/BandeauPage.astro';
+import ListeArticles from '../../../components/ListeArticles.astro';
+import { articlesPublies, slugCategorie, type Article } from '../../../lib/contenu.ts';
+import { CATEGORIES_ARTICLE } from '../../../lib/schemas.ts';
+
+export async function getStaticPaths() {
+  const articles = await articlesPublies();
+  return CATEGORIES_ARTICLE.map((c) => ({
+    params: { categorie: slugCategorie(c) },
+    props: { categorie: c, articles: articles.filter((a) => a.data.categorie === c) },
+  }));
+}
+const { categorie, articles } = Astro.props as { categorie: string; articles: Article[] };
+---
+<Base titre={`Actualités : ${categorie}`} description={`Les articles « ${categorie} » du Brass Band Fribourg.`}>
+  <BandeauPage titre={categorie} surtitre="Actualités" fil={{ href: '/blog/', label: 'Toutes les actualités' }} />
+  <section class="section">
+    <div class="conteneur">
+      <ListeArticles articles={articles} categorieActive={categorie} />
+    </div>
+  </section>
+</Base>

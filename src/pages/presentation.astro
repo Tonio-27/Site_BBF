@@ -1,0 +1,127 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Email from '../components/Email.astro';
+import { grouperParPupitre } from '../lib/pupitres.ts';
+
+const page = (await getEntry('presentation', 'presentation'))!;
+const { Content: Historique } = await render(page);
+const p = page.data;
+const directeurs = (await getCollection('directeurs', ({ data }) => data.actif)).sort((a, b) => a.data.ensemble.localeCompare(b.data.ensemble));
+const bios = await Promise.all(directeurs.map(async (d) => ({ d, Bio: (await render(d)).Content })));
+const musiciens = await getCollection('musiciens', ({ data }) => data.actif);
+const effectifs = (['A', 'B'] as const).map((e) => {
+  const membres = musiciens.filter((m) => m.data.ensemble === e).map((m) => m.data);
+  return { ensemble: e, total: membres.length, groupes: grouperParPupitre(membres) };
+});
+const comite = (await getCollection('comite')).sort((a, b) => a.data.ordre - b.data.ordre);
+---
+<Base titre="Le BBF" description="Histoire, palmarès, directeurs et effectifs des Formations A et B du Brass Band Fribourg.">
+  <BandeauPage titre="Le Brass Band Fribourg" surtitre="Présentation" intro={p.introduction} />
+
+  <nav class="conteneur sommaire" aria-label="Dans cette page">
+    <ul>
+      <li><a href="#histoire">Histoire</a></li>
+      {p.palmares.length > 0 && <li><a href="#palmares">Palmarès</a></li>}
+      <li><a href="#directeurs">Directeurs</a></li>
+      <li><a href="#formation-a">Formation A</a></li>
+      <li><a href="#formation-b">Formation B</a></li>
+      <li><a href="#comite">Comité</a></li>
+    </ul>
+  </nav>
+
+  <section class="section" id="histoire" aria-labelledby="t-histoire">
+    <div class="conteneur deux">
+      <div class="prose">
+        <h2 id="t-histoire">Histoire</h2>
+        <Historique />
+      </div>
+      {p.photo && <Image src={p.photo.src} alt={p.photo.alt} widths={[480, 800, 1200]} sizes="(min-width: 60rem) 32rem, 100vw" class="arrondi" />}
+    </div>
+  </section>
+
+  {p.palmares.length > 0 && (
+    <section class="section section--noir" id="palmares" aria-labelledby="t-palmares">
+      <div class="conteneur">
+        <h2 id="t-palmares">Palmarès</h2>
+        <ol class="palmares">
+          {p.palmares.toSorted((a, b) => b.annee - a.annee).map((x) => <li><span class="palmares__annee">{x.annee}</span> {x.resultat}</li>)}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  <section class="section" id="directeurs" aria-labelledby="t-directeurs">
+    <div class="conteneur">
+      <h2 id="t-directeurs">Directeurs musicaux</h2>
+      <div class="directeurs">
+        {bios.map(({ d, Bio }) => (
+          <article class="directeur">
+            {d.data.photo && <Image src={d.data.photo.src} alt={d.data.photo.alt} width={320} widths={[320, 640]} sizes="10rem" class="directeur__photo" loading="lazy" />}
+            <div>
+              <p class="surtitre">Formation {d.data.ensemble} · depuis {d.data.depuis}</p>
+              <h3>{d.data.prenom} {d.data.nom}</h3>
+              <div class="prose"><Bio /></div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {effectifs.map((e) => (
+    <section class="section section--gris" id={`formation-${e.ensemble.toLowerCase()}`} aria-labelledby={`t-formation-${e.ensemble}`}>
+      <div class="conteneur">
+        <h2 id={`t-formation-${e.ensemble}`}>Formation {e.ensemble} <span class="compte">{e.total} musiciens</span></h2>
+        <div class="pupitres">
+          {e.groupes.map((g) => (
+            <div class="pupitre">
+              <h3>{g.pupitre}</h3>
+              <ul>{g.membres.map((m) => <li>{m.prenom} {m.nom}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="section" id="comite" aria-labelledby="t-comite">
+    <div class="conteneur">
+      <h2 id="t-comite">Comité</h2>
+      <ul class="comite">
+        {comite.map(({ data: c }) => (
+          <li>
+            <p class="surtitre">{c.fonction}</p>
+            <p class="comite__nom">{c.prenom} {c.nom}</p>
+            {c.email && <Email adresse={c.email} />}
+            {c.telephone && c.afficher_telephone && <p><a href={`tel:${c.telephone.replace(/\s/g, '')}`}>{c.telephone}</a></p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .sommaire ul { list-style: none; display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-4); padding: var(--e-4) 0; margin: 0; border-bottom: 1px solid var(--gris-clair); }
+  .sommaire a { font-weight: 600; text-decoration: none; }
+  .deux { display: grid; gap: var(--e-5); align-items: start; }
+  @media (min-width: 60rem) { .deux { grid-template-columns: 1.2fr 1fr; } }
+  :global(.arrondi) { border-radius: var(--rayon-lg); }
+  .palmares { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-3); max-width: 48rem; }
+  .palmares li { display: flex; gap: var(--e-4); border-bottom: 1px solid var(--gris-fonce); padding-bottom: var(--e-3); }
+  .palmares__annee { font-family: var(--police-titres); font-weight: 800; color: var(--rouge-clair); font-size: var(--t-lg); min-width: 3.5rem; }
+  .directeurs { display: grid; gap: var(--e-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
+  .directeur { display: grid; grid-template-columns: 8rem 1fr; gap: var(--e-4); align-items: start; }
+  .directeur :global(.directeur__photo) { border-radius: var(--rayon-lg); aspect-ratio: 4 / 5; object-fit: cover; width: 8rem; }
+  @media (max-width: 30rem) { .directeur { grid-template-columns: 1fr; } }
+  .compte { font-size: var(--t-sm); font-weight: 600; color: var(--gris); margin-left: var(--e-2); }
+  .pupitres { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+  .pupitre h3 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: .08em; color: var(--rouge-fonce); border-bottom: 2px solid var(--rouge); padding-bottom: var(--e-1); margin-bottom: var(--e-2); }
+  .pupitre ul { list-style: none; margin: 0; padding: 0; }
+  .comite { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
+  .comite li { border-left: 3px solid var(--rouge); padding-left: var(--e-3); }
+  .comite p { margin: 0; }
+  .comite__nom { font-weight: 700; font-size: var(--t-lg); }
+</style>

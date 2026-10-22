@@ -1,0 +1,19 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import ListeArticles from '../../components/ListeArticles.astro';
+import { articlesPublies, type Article } from '../../lib/contenu.ts';
+
+export const getStaticPaths = (async ({ paginate }) => paginate(await articlesPublies(), { pageSize: 12 })) satisfies GetStaticPaths;
+const { page } = Astro.props as { page: Page<Article> };
+const titre = page.currentPage === 1 ? 'Actualités' : `Actualités — page ${page.currentPage}`;
+---
+<Base titre={titre} description="Toutes les actualités du Brass Band Fribourg : concerts, concours, recrutement et vie de l'association.">
+  <BandeauPage titre="Actualités" surtitre="Le journal du BBF" />
+  <section class="section">
+    <div class="conteneur">
+      <ListeArticles articles={page.data} precedente={page.url.prev} suivante={page.url.next} page={page.currentPage} pages={page.lastPage} />
+    </div>
+  </section>
+</Base>

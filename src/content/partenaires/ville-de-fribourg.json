@@ -1,0 +1,8 @@
+{
+  "nom": "Ville de Fribourg",
+  "logo": "../../assets/uploads/logo-ville-de-fribourg.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Institution",
+  "ordre": 2,
+  "actif": true
+}

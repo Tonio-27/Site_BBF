@@ -1,0 +1,14 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from './Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import { dateLongue } from '../lib/dates.ts';
+interface Props { id: string }
+const page = await getEntry('legal', Astro.props.id);
+if (!page) throw new Error(`Page légale manquante : ${Astro.props.id}`);
+const { Content } = await render(page);
+---
+<Base titre={page.data.titre} description={`${page.data.titre} du site du Brass Band Fribourg.`}>
+  <BandeauPage titre={page.data.titre} intro={`Mise à jour : ${dateLongue(page.data.mise_a_jour)}`} />
+  <div class="section conteneur-texte prose"><Content /></div>
+</Base>

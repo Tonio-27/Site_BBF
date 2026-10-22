@@ -1,0 +1,16 @@
+# Nightly rebuild: a static site doesn't know today's date, so past events
+# must be moved to the archives and expired banners hidden every night.
+name: Rebuild nocturne
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # 03:17 Swiss winter time (04:17 in summer)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

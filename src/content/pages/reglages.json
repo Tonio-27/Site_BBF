@@ -1,0 +1,14 @@
+{
+  "nom": "Brass Band Fribourg",
+  "adresse": "Brass Band Fribourg\nCase postale\n1700 Fribourg",
+  "email_general": "info@brassbandfribourg.ch",
+  "facebook": "https://www.facebook.com/",
+  "instagram": "https://www.instagram.com/",
+  "youtube": "https://www.youtube.com/",
+  "description_seo": "Le Brass Band Fribourg : deux formations de brass band, concerts, concours et agenda. Rejoignez-nous ou soutenez-nous !",
+  "image_partage": "../../assets/uploads/partage-defaut.jpg",
+  "annonce_active": true,
+  "annonce_texte": "Concours Suisse des Brass Bands les 28 et 29 novembre à Montreux — venez nous soutenir !",
+  "annonce_lien": "/agenda/2026-11-28-concours-suisse-des-brass-bands/",
+  "annonce_fin": "2026-11-29"
+}

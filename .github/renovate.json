@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Europe/Zurich",
+  "schedule": ["before 6am on the first day of the month"],
+  "minimumReleaseAge": "7 days",
+  "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "groupName": "dépendances mensuelles",
+      "matchPackagePatterns": ["*"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "matchPackageNames": ["@sveltia/cms"],
+      "automerge": false,
+      "groupName": "Sveltia CMS",
+      "prBodyNotes": ["Après fusion : `npm run cms:update` pour recopier sveltia-cms.js dans public/admin/, puis tester /admin."]
+    }
+  ],
+  "labels": ["dépendances"]
+}

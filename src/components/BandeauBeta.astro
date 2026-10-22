@@ -1,0 +1,13 @@
+---
+// Beta-only notice. Remove this component from BaseLayout before go-live
+// (or build with PUBLIC_BETA=false).
+const actif = import.meta.env.PUBLIC_BETA !== 'false';
+---
+{actif && (
+  <div class="beta" role="region" aria-label="Version bêta">
+    <strong>Version bêta</strong> — site de démonstration pour le comité. Textes, noms et photos sont fictifs ou provisoires.
+  </div>
+)}
+<style>
+  .beta { background: #fff4c2; color: #3d3200; font-size: var(--t-sm); text-align: center; padding: 0.4rem 1rem; border-bottom: 1px solid #e6d27a; }
+</style>

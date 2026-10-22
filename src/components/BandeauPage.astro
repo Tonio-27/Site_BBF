@@ -1,0 +1,13 @@
+---
+interface Props { titre: string; intro?: string; surtitre?: string; fil?: { href: string; label: string } }
+const { titre, intro, surtitre, fil } = Astro.props;
+---
+<div class="bandeau-page sur-noir">
+  <div class="conteneur">
+    {fil && <p class="fil"><a href={fil.href}>← {fil.label}</a></p>}
+    {surtitre && <p class="surtitre">{surtitre}</p>}
+    <h1>{titre}</h1>
+    {intro && <p>{intro}</p>}
+    <slot />
+  </div>
+</div>

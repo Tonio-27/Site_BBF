@@ -1,0 +1,66 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import { dateLongue } from '../../lib/dates.ts';
+
+export async function getStaticPaths() {
+  return (await getCollection('albums')).map((album) => ({ params: { slug: album.id }, props: { album } }));
+}
+const { album } = Astro.props as { album: CollectionEntry<'albums'> };
+const a = album.data;
+// Full-size versions for the lightbox, generated at build time.
+const photos = await Promise.all(
+  a.photos.map(async (p, i) => ({
+    ...p,
+    alt: p.legende ?? `${a.titre}, photo ${i + 1}`,
+    grande: (await getImage({ src: p.image, width: 1920, format: 'webp' })).src,
+  })),
+);
+---
+<Base titre={a.titre} description={`Album photo « ${a.titre} » du Brass Band Fribourg, ${dateLongue(a.date)}.`} image={a.couverture.src}>
+  <BandeauPage titre={a.titre} surtitre={dateLongue(a.date)} fil={{ href: '/gallery/', label: 'Toutes les photos' }}>
+    {a.lien_externe && <p><a class="bouton bouton--contour lien-album" href={a.lien_externe} rel="noopener">Voir l’album complet</a></p>}
+  </BandeauPage>
+  <section class="section">
+    <ul class="conteneur mosaique" data-galerie>
+      {photos.map((p, i) => (
+        <li>
+          <a href={p.grande} data-legende={p.legende ?? ''} data-index={i}>
+            <Image src={p.image} alt={p.alt} width={480} widths={[320, 480, 720]} sizes="(min-width: 60rem) 18rem, 50vw" loading="lazy" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+  <dialog class="visionneuse" aria-label="Visionneuse photo" data-visionneuse>
+    <figure>
+      <img alt="" src={photos[0]?.grande ?? "/favicon.svg"} data-v-image />
+      <figcaption data-v-legende></figcaption>
+    </figure>
+    <p class="visionneuse__compteur" data-v-compteur aria-live="polite"></p>
+    <button type="button" class="visionneuse__btn visionneuse__fermer" data-v-fermer aria-label="Fermer">✕</button>
+    <button type="button" class="visionneuse__btn visionneuse__prec" data-v-prec aria-label="Photo précédente">‹</button>
+    <button type="button" class="visionneuse__btn visionneuse__suiv" data-v-suiv aria-label="Photo suivante">›</button>
+  </dialog>
+</Base>
+<style>
+  .mosaique { list-style: none; padding: 0; display: grid; gap: var(--e-2); grid-template-columns: repeat(auto-fill, minmax(min(45%, 16rem), 1fr)); }
+  .mosaique a { display: block; border-radius: var(--rayon); overflow: hidden; }
+  .mosaique :global(img) { aspect-ratio: 1; object-fit: cover; width: 100%; transition: transform .2s; }
+  .mosaique a:hover :global(img) { transform: scale(1.03); }
+  .lien-album { color: var(--blanc) !important; margin-top: var(--e-3); }
+  .visionneuse { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgb(0 0 0 / .95); color: var(--blanc); }
+  .visionneuse::backdrop { background: rgb(0 0 0 / .9); }
+  .visionneuse figure { margin: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3.5rem 1rem 2rem; gap: var(--e-3); }
+  .visionneuse img { max-height: calc(100% - 3rem); max-width: 100%; object-fit: contain; }
+  .visionneuse figcaption { text-align: center; }
+  .visionneuse__compteur { position: absolute; top: 1rem; left: 1rem; margin: 0; font-size: var(--t-sm); }
+  .visionneuse__btn { position: absolute; background: rgb(255 255 255 / .12); color: var(--blanc); border: 0; width: 3rem; height: 3rem; border-radius: 50%; font-size: 1.6rem; cursor: pointer; }
+  .visionneuse__btn:hover { background: var(--rouge); }
+  .visionneuse__btn:focus-visible { outline-color: var(--blanc); }
+  .visionneuse__fermer { top: .75rem; right: .75rem; font-size: 1.2rem; }
+  .visionneuse__prec { left: .75rem; top: 50%; transform: translateY(-50%); }
+  .visionneuse__suiv { right: .75rem; top: 50%; transform: translateY(-50%); }
+</style>

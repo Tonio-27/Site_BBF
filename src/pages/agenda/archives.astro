@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import EvtItem from '../../components/EvtItem.astro';
+import { evenements } from '../../lib/contenu.ts';
+import { passes } from '../../lib/evenements.ts';
+import { annee } from '../../lib/dates.ts';
+
+const anciens = passes(await evenements());
+const parAnnee = Map.groupBy(anciens, (e) => annee(e.data.date_debut));
+---
+<Base titre="Événements passés" description="Archives des concerts, concours et prestations du Brass Band Fribourg.">
+  <BandeauPage titre="Événements passés" fil={{ href: '/agenda/', label: 'Agenda' }} />
+  <section class="section">
+    <div class="conteneur conteneur-agenda">
+      {anciens.length === 0 && <p class="vide">Aucun événement archivé.</p>}
+      {[...parAnnee].map(([a, liste]) => (
+        <section class="annee">
+          <h2>{a}</h2>
+          <ul class="evts">{liste.map((e) => <EvtItem evt={e} />)}</ul>
+        </section>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .conteneur-agenda { max-width: 52rem; }
+  .annee + .annee { margin-top: var(--e-5); }
+  .annee h2 { color: var(--gris); font-size: var(--t-lg); }
+</style>

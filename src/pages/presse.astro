@@ -1,0 +1,53 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Email from '../components/Email.astro';
+import { dateLongue, iso } from '../lib/dates.ts';
+
+const page = (await getEntry('page_presse', 'presse'))!.data;
+const articles = (await getCollection('presse')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const photoHd = page.photo_presse ? (await getImage({ src: page.photo_presse.src, format: 'jpg', quality: 90 })).src : undefined;
+---
+<Base titre="Presse" description="Revue de presse, kit presse et contact presse du Brass Band Fribourg.">
+  <BandeauPage titre="Presse" surtitre="Espace médias" intro={page.introduction} />
+  <section class="section" aria-labelledby="t-revue">
+    <div class="conteneur deux">
+      <div>
+        <h2 id="t-revue">Revue de presse</h2>
+        <ul class="revue">
+          {articles.map(({ data: a }) => (
+            <li>
+              <p class="carte__meta"><strong>{a.media}</strong> · <time datetime={iso(a.date)}>{dateLongue(a.date)}</time></p>
+              <h3><a href={a.fichier ?? a.lien} rel="noopener">{a.titre}</a>{a.fichier && ' (PDF)'}</h3>
+              {a.resume && <p>{a.resume}</p>}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <aside class="kit" aria-labelledby="t-kit">
+        <h2 id="t-kit">Kit presse</h2>
+        <p>{page.texte_presentation}</p>
+        {page.photo_presse && <Image src={page.photo_presse.src} alt={page.photo_presse.alt} width={640} widths={[400, 640]} sizes="22rem" class="kit__photo" loading="lazy" />}
+        <ul class="kit__liste">
+          {photoHd && <li><a href={photoHd} download>Photo de presse (haute définition)</a></li>}
+          <li><a href="/documents/logo-bbf.svg" download>Logo du BBF (SVG)</a></li>
+          {page.kit.map((k) => <li><a href={k.fichier} download>{k.titre}</a></li>)}
+        </ul>
+        <h3>Contact presse</h3>
+        <p>{page.contact_nom}<br /><Email adresse={page.contact_email} /></p>
+      </aside>
+    </div>
+  </section>
+</Base>
+<style>
+  .deux { display: grid; gap: var(--e-5); }
+  @media (min-width: 60rem) { .deux { grid-template-columns: 1fr 22rem; } }
+  .revue { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-4); }
+  .revue li { border-bottom: 1px solid var(--gris-clair); padding-bottom: var(--e-4); }
+  .revue h3 { margin: var(--e-1) 0; }
+  .kit { background: #f5f5f5; border-radius: var(--rayon-lg); padding: var(--e-4); border-top: 4px solid var(--rouge); align-self: start; }
+  .kit :global(.kit__photo) { border-radius: var(--rayon); margin-bottom: var(--e-3); }
+  .kit__liste { padding-left: 1.2em; margin-bottom: var(--e-4); }
+</style>

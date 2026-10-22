@@ -1,0 +1,8 @@
+{
+  "nom": "Imprimerie Sarine",
+  "logo": "../../assets/uploads/logo-imprimerie-sarine.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Fournisseur",
+  "ordre": 6,
+  "actif": true
+}

@@ -1,0 +1,8 @@
+{
+  "nom": "Musique Instruments SA",
+  "logo": "../../assets/uploads/logo-musique-instruments-sa.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Fournisseur",
+  "ordre": 8,
+  "actif": true
+}

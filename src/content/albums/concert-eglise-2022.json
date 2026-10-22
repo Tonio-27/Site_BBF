@@ -1,0 +1,39 @@
+{
+  "titre": "Concert d'église 2022",
+  "date": "2022-12-11",
+  "ensemble": "A",
+  "couverture": {
+    "src": "../../assets/uploads/album-concert-eglise-2022-01.jpg",
+    "alt": "Concert d'église 2022 : photo de couverture"
+  },
+  "photos": [
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-01.jpg",
+      "legende": "Concert d'église 2022 — moment 1"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-02.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-03.jpg",
+      "legende": "Concert d'église 2022 — moment 3"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-04.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-05.jpg",
+      "legende": "Concert d'église 2022 — moment 5"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-06.jpg"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-07.jpg",
+      "legende": "Concert d'église 2022 — moment 7"
+    },
+    {
+      "image": "../../assets/uploads/album-concert-eglise-2022-08.jpg"
+    }
+  ]
+}

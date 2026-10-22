@@ -1,0 +1,11 @@
+{
+  "titre": "Apéritif du Nouvel An de la Ville",
+  "date_debut": "2027-01-17T11:00",
+  "lieu": "Place de l'Hôtel-de-Ville",
+  "localite": "Fribourg",
+  "ensembles": [
+    "B"
+  ],
+  "type": "Prestation",
+  "annule": true
+}

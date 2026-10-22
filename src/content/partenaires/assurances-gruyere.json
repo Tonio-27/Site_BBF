@@ -1,0 +1,8 @@
+{
+  "nom": "Assurances Gruyère",
+  "logo": "../../assets/uploads/logo-assurances-gruyere.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Partenaire principal",
+  "ordre": 10,
+  "actif": true
+}

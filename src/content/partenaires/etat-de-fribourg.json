@@ -1,0 +1,8 @@
+{
+  "nom": "État de Fribourg",
+  "logo": "../../assets/uploads/logo-etat-de-fribourg.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Institution",
+  "ordre": 3,
+  "actif": true
+}

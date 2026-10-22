@@ -1,0 +1,8 @@
+{
+  "nom": "Banque Cantonale",
+  "logo": "../../assets/uploads/logo-banque-cantonale.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Partenaire principal",
+  "ordre": 1,
+  "actif": true
+}

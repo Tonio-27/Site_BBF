@@ -1,0 +1,8 @@
+{
+  "introduction": "Journalistes, organisateurs : vous trouverez ici les articles parus sur le BBF et tout le nécessaire pour parler de nous.",
+  "texte_presentation": "Le Brass Band Fribourg (BBF) réunit deux formations de brass band, A et B, soit plus de soixante musiciens. La Formation A concourt en catégorie Excellence au Concours Suisse des Brass Bands ; la Formation B forme la relève.",
+  "kit": [],
+  "photo_presse": { "src": "../../assets/uploads/presse-photo.jpg", "alt": "Photo de presse du Brass Band Fribourg" },
+  "contact_nom": "Service de presse du BBF",
+  "contact_email": "presse@brassbandfribourg.ch"
+}

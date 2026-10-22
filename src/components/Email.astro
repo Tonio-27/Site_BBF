@@ -1,0 +1,9 @@
+---
+// Spam-resistant e-mail link: the address never appears in clear in the HTML.
+// public/js/site.js rebuilds a mailto: link; without JS a readable form is shown.
+interface Props { adresse: string; classe?: string }
+const { adresse, classe } = Astro.props;
+const [utilisateur, domaine] = adresse.split('@');
+const code = (s: string) => [...s].reverse().join('');
+---
+<a class:list={['email', classe]} href="/contact/" data-u={code(utilisateur)} data-d={code(domaine)}>{utilisateur} [at] {domaine}</a>

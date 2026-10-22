@@ -1,0 +1,438 @@
+# Sveltia CMS configuration — menus and fields of /admin.
+# Every field here mirrors src/lib/schemas.ts; `npm run check:config` fails if they diverge.
+
+backend:
+  name: github
+  repo: brassbandfribourg/site-web
+  branch: main
+  # Authentication Worker (sveltia-cms-auth on Cloudflare) — URL to set in phase 4.
+  base_url: https://bbf-cms-auth.workers.dev
+  auth_methods: [oauth]
+  commit_messages:
+    create: "content: ajout {{collection}} « {{slug}} »"
+    update: "content: modification {{collection}} « {{slug}} »"
+    delete: "content: suppression {{collection}} « {{slug}} »"
+    uploadMedia: "content: ajout du fichier « {{path}} »"
+    deleteMedia: "content: suppression du fichier « {{path}} »"
+
+site_url: https://brassbandfribourg.ch
+display_url: https://brassbandfribourg.ch
+logo:
+  src: /favicon.svg
+
+media_folder: src/assets/uploads
+public_folder: /src/assets/uploads
+
+# Photos are resized to 2400 px max and converted to WebP before upload.
+media_libraries:
+  default:
+    config:
+      max_file_size: 15000000
+      transformations:
+        raster_image:
+          format: webp
+          quality: 82
+          width: 2400
+          height: 2400
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  # ------------------------------------------------------------------ Actualités
+  - name: articles
+    label: Actualités
+    label_singular: Article
+    description: Les articles du blog. Cocher « Brouillon » pour préparer un article sans le publier.
+    folder: src/content/articles
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: md
+    format: frontmatter
+    path: "{{year}}-{{month}}-{{day}}-{{fields.slug}}"
+    slug: "{{slug}}"
+    identifier_field: titre
+    summary: "{{titre}} — {{date}}{{brouillon | ternary(' (brouillon)', '')}}"
+    sortable_fields: { fields: [date, titre, categorie], default: { field: date, direction: descending } }
+    view_filters:
+      - { label: Brouillons, field: brouillon, pattern: true }
+    view_groups:
+      - { label: Catégorie, field: categorie }
+    fields:
+      - { name: titre, label: Titre, widget: string }
+      - name: slug
+        label: Adresse de la page (slug)
+        widget: string
+        pattern: ["^[a-z0-9]+(?:-[a-z0-9]+)*$", "Uniquement des minuscules sans accent, des chiffres et des tirets"]
+        hint: "Fin de l'adresse de l'article, ex. « concert-annuel-2027 » → brassbandfribourg.ch/concert-annuel-2027/. Ne plus la changer après publication."
+      - { name: date, label: Date, widget: datetime, time_format: false, format: YYYY-MM-DD, default: "{{now}}" }
+      - name: categorie
+        label: Catégorie
+        widget: select
+        options: [Actualité, Recrutement, Concert, Concours, Association]
+        default: Actualité
+      - name: image
+        label: Image de couverture
+        widget: object
+        required: false
+        hint: "Photo paysage, au moins 1600 px de large. Elle sert aussi d'aperçu sur les réseaux sociaux."
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Description de l'image, widget: string, hint: "Décrire la photo en quelques mots pour les personnes malvoyantes (obligatoire)." }
+      - { name: resume, label: Résumé, widget: text, maxlength: 200, hint: "1 à 2 phrases (200 caractères max). Affiché dans la liste des articles et sur Google." }
+      - { name: body, label: Texte, widget: markdown, hint: "Pour insérer une vidéo YouTube, coller son adresse seule sur une ligne." }
+      - { name: brouillon, label: Brouillon, widget: boolean, default: false, required: false, hint: "Coché : l'article n'est pas publié sur le site." }
+
+  # ------------------------------------------------------------------ Agenda
+  - name: evenements
+    label: Agenda
+    label_singular: Événement
+    description: Concerts, concours et prestations. Un événement passé passe automatiquement dans les archives.
+    folder: src/content/evenements
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: json
+    format: json
+    path: "{{fields.date_debut | date('YYYY-MM-DD')}}-{{slug}}"
+    slug: "{{titre}}"
+    identifier_field: titre
+    summary: "{{date_debut | date('DD.MM.YYYY')}} · {{titre}} · {{localite}}{{annule | ternary(' — ANNULÉ', '')}}"
+    sortable_fields: { fields: [date_debut, titre], default: { field: date_debut, direction: descending } }
+    view_filters:
+      - { label: Formation A, field: ensembles, pattern: A }
+      - { label: Formation B, field: ensembles, pattern: B }
+      - { label: Annulés, field: annule, pattern: true }
+    fields:
+      - { name: titre, label: Titre, widget: string, hint: "Ex. « Concours Suisse des Brass Bands »" }
+      - { name: date_debut, label: Début, widget: datetime, format: "YYYY-MM-DDTHH:mm", hint: "Date et heure, heure suisse." }
+      - { name: date_fin, label: Fin, widget: datetime, format: "YYYY-MM-DDTHH:mm", required: false, hint: "Seulement pour un événement sur plusieurs jours ou avec une heure de fin." }
+      - { name: lieu, label: Lieu, widget: string, hint: "Ex. « 2M2C »" }
+      - { name: localite, label: Localité, widget: string, hint: "Ex. « Montreux »" }
+      - { name: ensembles, label: Formation(s), widget: select, multiple: true, min: 1, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }] }
+      - { name: type, label: Type, widget: select, options: [Concert, Concours, Prestation, Autre], default: Concert }
+      - { name: description, label: Description, widget: markdown, required: false }
+      - { name: billetterie_url, label: Lien de billetterie, widget: string, type: url, required: false, hint: "Adresse complète (https://…). Affiche un bouton « Réserver »." }
+      - name: image
+        label: Image
+        widget: object
+        required: false
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Description de l'image, widget: string }
+      - { name: annule, label: Annulé, widget: boolean, default: false, required: false, hint: "Cocher plutôt que supprimer : le site affiche « Annulé »." }
+
+  # ------------------------------------------------------------------ Musiciens
+  - name: musiciens
+    label: Musiciens
+    label_singular: Musicien
+    description: Les effectifs des Formations A et B, affichés par pupitre sur la page « Le BBF ».
+    folder: src/content/musiciens
+    create: true
+    extension: json
+    format: json
+    path: "{{fields.nom | lower}}-{{fields.prenom | lower}}"
+    slug: "{{nom}}-{{prenom}}"
+    identifier_field: nom
+    summary: "{{prenom}} {{nom}} — {{pupitre}} ({{ensemble}}){{actif | ternary('', ' — inactif')}}"
+    sortable_fields: { fields: [nom, pupitre, ensemble], default: { field: nom } }
+    view_groups:
+      - { label: Formation, field: ensemble }
+      - { label: Pupitre, field: pupitre }
+    view_filters:
+      - { label: Formation A, field: ensemble, pattern: A }
+      - { label: Formation B, field: ensemble, pattern: B }
+      - { label: Inactifs, field: actif, pattern: false }
+    fields:
+      - { name: prenom, label: Prénom, widget: string }
+      - { name: nom, label: Nom, widget: string }
+      - { name: ensemble, label: Formation, widget: select, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }] }
+      - name: pupitre
+        label: Pupitre
+        widget: select
+        options:
+              - Soprano Cornet
+              - Principal Cornet
+              - Assistant Cornet
+              - Solo Cornet
+              - Repiano Cornet
+              - Second Cornet
+              - Third Cornet
+              - Flugel Horn
+              - Solo Horn
+              - First Horn
+              - Second Horn
+              - Solo Baritone
+              - Second Baritone
+              - Solo Euphonium
+              - Assistant Euphonium
+              - Euphonium
+              - Solo Trombone
+              - Second Trombone
+              - Bass Trombone
+              - Eb Bass
+              - Bb Bass
+              - Percussion
+      - { name: ordre, label: Ordre dans le pupitre, widget: number, value_type: int, required: false, hint: "Facultatif : 1 = affiché en premier dans son pupitre." }
+      - { name: photo, label: Photo, widget: image, required: false, media_folder: /src/assets/uploads, public_folder: ../../assets/uploads, hint: "Pas encore affichée sur le site." }
+      - { name: actif, label: Actif, widget: boolean, default: true, hint: "Décocher pour retirer le musicien du site sans perdre sa fiche." }
+
+  # ------------------------------------------------------------------ Directeurs
+  - name: directeurs
+    label: Directeurs
+    label_singular: Directeur
+    folder: src/content/directeurs
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: md
+    format: frontmatter
+    path: "{{fields.prenom | lower}}-{{fields.nom | lower}}"
+    slug: "{{prenom}}-{{nom}}"
+    identifier_field: nom
+    summary: "{{prenom}} {{nom}} — Formation {{ensemble}}"
+    fields:
+      - { name: prenom, label: Prénom, widget: string }
+      - { name: nom, label: Nom, widget: string }
+      - { name: ensemble, label: Formation dirigée, widget: select, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }] }
+      - name: photo
+        label: Photo
+        widget: object
+        required: false
+        hint: "Portrait vertical, au moins 800 px de large."
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Description de l'image, widget: string }
+      - { name: depuis, label: Directeur depuis (année), widget: number, value_type: int }
+      - { name: actif, label: Actif, widget: boolean, default: true }
+      - { name: body, label: Biographie, widget: markdown }
+
+  # ------------------------------------------------------------------ Comité
+  - name: comite
+    label: Comité
+    label_singular: Membre du comité
+    description: Les contacts affichés sur les pages « Contact » et « Le BBF ». Utiliser les adresses de fonction, jamais d'adresse privée.
+    folder: src/content/comite
+    create: true
+    extension: json
+    format: json
+    slug: "{{fonction}}"
+    identifier_field: fonction
+    summary: "{{fonction}} — {{prenom}} {{nom}}"
+    sortable_fields: { fields: [ordre, fonction], default: { field: ordre } }
+    fields:
+      - { name: prenom, label: Prénom, widget: string }
+      - { name: nom, label: Nom, widget: string }
+      - { name: fonction, label: Fonction, widget: string, hint: "Ex. « Président », « Responsable Formation A »" }
+      - { name: email, label: E-mail de fonction, widget: string, type: email, required: false, hint: "Ex. president@brassbandfribourg.ch — jamais une adresse privée." }
+      - { name: telephone, label: Téléphone, widget: string, required: false }
+      - { name: afficher_telephone, label: Afficher le téléphone sur le site, widget: boolean, default: false, required: false, hint: "Uniquement avec l'accord de la personne." }
+      - { name: ordre, label: Ordre d'affichage, widget: number, value_type: int, default: 99 }
+
+  # ------------------------------------------------------------------ Photos
+  - name: albums
+    label: Photos
+    label_singular: Album
+    description: "Albums de la galerie. 60 photos au maximum par album : l'album complet va sur le Drive (lien externe)."
+    folder: src/content/albums
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: json
+    format: json
+    path: "{{slug}}"
+    slug: "{{titre}}"
+    identifier_field: titre
+    summary: "{{titre}} — {{date}}"
+    sortable_fields: { fields: [date, titre], default: { field: date, direction: descending } }
+    fields:
+      - { name: titre, label: Titre, widget: string }
+      - { name: date, label: Date, widget: datetime, time_format: false, format: YYYY-MM-DD, default: "{{now}}" }
+      - { name: ensemble, label: Formation, widget: select, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }, { label: Les deux, value: Les deux }], default: Les deux }
+      - name: couverture
+        label: Photo de couverture
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Description de l'image, widget: string }
+      - name: photos
+        label: Photos
+        label_singular: Photo
+        widget: list
+        max: 60
+        hint: "Glisser plusieurs photos d'un coup dans le champ image. 60 photos maximum."
+        summary: "{{fields.legende}}"
+        fields:
+          - { name: image, label: Photo, widget: image }
+          - { name: legende, label: Légende, widget: string, required: false }
+      - { name: lien_externe, label: Lien vers l'album complet, widget: string, type: url, required: false, hint: "Ex. dossier partagé sur le Drive du BBF." }
+
+  # ------------------------------------------------------------------ Partenaires
+  - name: partenaires
+    label: Partenaires
+    label_singular: Partenaire
+    folder: src/content/partenaires
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: json
+    format: json
+    slug: "{{nom}}"
+    identifier_field: nom
+    summary: "{{nom}} — {{categorie}}{{actif | ternary('', ' — inactif')}}"
+    sortable_fields: { fields: [ordre, nom, categorie], default: { field: ordre } }
+    view_groups:
+      - { label: Catégorie, field: categorie }
+    fields:
+      - { name: nom, label: Nom, widget: string }
+      - { name: logo, label: Logo, widget: image, hint: "SVG ou PNG à fond transparent de préférence." }
+      - { name: site_web, label: Site web, widget: string, type: url, required: false }
+      - { name: categorie, label: Catégorie, widget: select, options: [Partenaire principal, Sponsor, Institution, Fournisseur], default: Sponsor }
+      - { name: ordre, label: Ordre d'affichage, widget: number, value_type: int, default: 99 }
+      - { name: actif, label: Actif, widget: boolean, default: true, hint: "Décocher pour retirer le logo du site." }
+
+  # ------------------------------------------------------------------ Presse
+  - name: presse
+    label: Presse
+    label_singular: Article de presse
+    folder: src/content/presse
+    create: true
+    extension: json
+    format: json
+    path: "{{fields.date}}-{{slug}}"
+    slug: "{{media}}"
+    identifier_field: titre
+    summary: "{{date}} · {{media}} · {{titre}}"
+    sortable_fields: { fields: [date, media], default: { field: date, direction: descending } }
+    fields:
+      - { name: titre, label: Titre de l'article, widget: string }
+      - { name: media, label: Média, widget: string, hint: "Ex. « La Liberté »" }
+      - { name: date, label: Date de parution, widget: datetime, time_format: false, format: YYYY-MM-DD }
+      - { name: resume, label: Résumé, widget: text, required: false }
+      - { name: fichier, label: Fichier PDF, widget: file, required: false, media_folder: /public/documents, public_folder: /documents, hint: "Le PDF de l'article OU le lien ci-dessous (au moins l'un des deux)." }
+      - { name: lien, label: Lien vers l'article en ligne, widget: string, type: url, required: false }
+
+  # ------------------------------------------------------------------ Pages
+  - name: pages
+    label: Pages
+    description: Les textes fixes du site.
+    files:
+      - name: accueil
+        label: Accueil
+        file: src/content/pages/accueil.json
+        media_folder: /src/assets/uploads
+        public_folder: ../../assets/uploads
+        fields:
+          - name: photo
+            label: Grande photo
+            widget: object
+            hint: "Photo paysage, au moins 2000 px de large."
+            fields:
+              - { name: src, label: Image, widget: image }
+              - { name: alt, label: Description de l'image, widget: string }
+          - { name: accroche, label: Titre d'accroche, widget: string }
+          - { name: introduction, label: Texte d'introduction, widget: text }
+          - { name: bloc_rejoindre, label: Bloc « Nous rejoindre », widget: text }
+          - { name: bloc_soutenir, label: Bloc « Nous soutenir », widget: text }
+          - { name: bloc_suivre, label: Bloc « Nous suivre », widget: text }
+      - name: presentation
+        label: Le BBF (présentation)
+        file: src/content/pages/presentation.md
+        media_folder: /src/assets/uploads
+        public_folder: ../../assets/uploads
+        fields:
+          - { name: introduction, label: Introduction, widget: text }
+          - name: photo
+            label: Photo
+            widget: object
+            required: false
+            fields:
+              - { name: src, label: Image, widget: image }
+              - { name: alt, label: Description de l'image, widget: string }
+          - name: palmares
+            label: Palmarès
+            label_singular: Résultat
+            widget: list
+            summary: "{{fields.annee}} — {{fields.resultat}}"
+            fields:
+              - { name: annee, label: Année, widget: number, value_type: int }
+              - { name: resultat, label: Résultat, widget: string }
+          - { name: body, label: Historique, widget: markdown }
+      - name: partenaires
+        label: Partenaires (textes)
+        file: src/content/pages/partenaires.json
+        fields:
+          - { name: remerciements, label: Texte de remerciement, widget: text }
+          - name: offres
+            label: Offres de soutien
+            label_singular: Offre
+            widget: list
+            fields:
+              - { name: titre, label: Titre, widget: string }
+              - { name: texte, label: Texte, widget: text }
+              - { name: pdf, label: Dossier PDF, widget: file, required: false, media_folder: /public/documents, public_folder: /documents }
+      - name: presse
+        label: Presse (textes et kit)
+        file: src/content/pages/presse.json
+        media_folder: /src/assets/uploads
+        public_folder: ../../assets/uploads
+        fields:
+          - { name: introduction, label: Introduction, widget: text }
+          - { name: texte_presentation, label: Texte de présentation du BBF, widget: text }
+          - name: kit
+            label: Kit presse (fichiers)
+            label_singular: Fichier
+            widget: list
+            fields:
+              - { name: titre, label: Titre, widget: string }
+              - { name: fichier, label: Fichier, widget: file, media_folder: /public/documents, public_folder: /documents }
+          - name: photo_presse
+            label: Photo de presse
+            widget: object
+            required: false
+            fields:
+              - { name: src, label: Image, widget: image }
+              - { name: alt, label: Description de l'image, widget: string }
+          - { name: contact_nom, label: Contact presse (nom), widget: string }
+          - { name: contact_email, label: Contact presse (e-mail), widget: string, type: email }
+      - name: confidentialite
+        label: Politique de confidentialité
+        file: src/content/legal/politique-de-confidentialite.md
+        fields:
+          - { name: titre, label: Titre, widget: string }
+          - { name: mise_a_jour, label: Date de mise à jour, widget: datetime, time_format: false, format: YYYY-MM-DD }
+          - { name: body, label: Texte, widget: markdown }
+      - name: conditions
+        label: Conditions générales
+        file: src/content/legal/conditions-generales.md
+        fields:
+          - { name: titre, label: Titre, widget: string }
+          - { name: mise_a_jour, label: Date de mise à jour, widget: datetime, time_format: false, format: YYYY-MM-DD }
+          - { name: body, label: Texte, widget: markdown }
+
+  # ------------------------------------------------------------------ Réglages
+  - name: reglages
+    label: Réglages
+    description: Coordonnées, réseaux sociaux, référencement et bandeau d'annonce.
+    files:
+      - name: reglages
+        label: Réglages du site
+        file: src/content/pages/reglages.json
+        media_folder: /src/assets/uploads
+        public_folder: ../../assets/uploads
+        fields:
+          - { name: nom, label: Nom de l'association, widget: string }
+          - { name: adresse, label: Adresse postale, widget: text }
+          - { name: email_general, label: E-mail général, widget: string, type: email }
+          - { name: facebook, label: Page Facebook, widget: string, type: url, required: false }
+          - { name: instagram, label: Compte Instagram, widget: string, type: url, required: false }
+          - { name: youtube, label: Chaîne YouTube, widget: string, type: url, required: false }
+          - { name: description_seo, label: Description pour Google, widget: text, maxlength: 170, hint: "Utilisée quand une page n'a pas sa propre description (170 caractères max)." }
+          - { name: image_partage, label: Image de partage par défaut, widget: image, hint: "1200 × 630 px, affichée quand on partage le site sur les réseaux." }
+          - { name: annonce_active, label: Afficher le bandeau d'annonce, widget: boolean, default: false, required: false }
+          - { name: annonce_texte, label: Texte du bandeau, widget: string, required: false, hint: "Ex. « Concert annuel le 21 mars — réservez ! »" }
+          - { name: annonce_lien, label: Lien du bandeau, widget: string, required: false, hint: "Ex. /agenda/ ou une adresse complète." }
+          - { name: annonce_fin, label: Masquer le bandeau après le, widget: datetime, time_format: false, format: YYYY-MM-DD, required: false, hint: "Le bandeau disparaît automatiquement après cette date." }

@@ -1,0 +1,28 @@
+---
+import type { Evenement } from '../lib/contenu.ts';
+import { pastille, iso, heure, aUneHeure, dateLongue } from '../lib/dates.ts';
+import { libelleEnsembles } from '../lib/evenements.ts';
+interface Props { evt: Evenement; titreNiveau?: 'h3' | 'h4'; avecAnnee?: boolean }
+const { evt, titreNiveau: T = 'h3', avecAnnee = false } = Astro.props;
+const d = evt.data;
+const p = pastille(d.date_debut);
+---
+<li class:list={['evt', { 'evt--annule': d.annule }]} data-ensembles={d.ensembles.join(' ')}>
+  <time class="evt__date" datetime={iso(d.date_debut)}>
+    <span class="evt__jour">{p.jour}</span>
+    <span class="evt__mois">{p.mois}</span>
+  </time>
+  <div>
+    <div class="evt__badges">
+      {d.annule && <span class="etiquette etiquette--rouge">Annulé</span>}
+      <span class="etiquette etiquette--clair">{libelleEnsembles(d.ensembles)}</span>
+    </div>
+    <T class="evt__titre"><a href={`/agenda/${evt.id}/`}>{d.titre}</a></T>
+    <p class="evt__infos">
+      {avecAnnee && <span>{dateLongue(d.date_debut)}</span>}
+      {aUneHeure(d.date_debut) && <span>{heure(d.date_debut)}</span>}
+      <span>{d.lieu}, {d.localite}</span>
+      <span>{d.type}</span>
+    </p>
+  </div>
+</li>

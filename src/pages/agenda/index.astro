@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import EvtItem from '../../components/EvtItem.astro';
+import { evenements } from '../../lib/contenu.ts';
+import { aVenir } from '../../lib/evenements.ts';
+import { annee } from '../../lib/dates.ts';
+
+const prochains = aVenir(await evenements());
+// Group by year so the list stays readable across seasons.
+const parAnnee = Map.groupBy(prochains, (e) => annee(e.data.date_debut));
+---
+<Base titre="Agenda" description="Concerts, concours et prestations à venir du Brass Band Fribourg, Formations A et B.">
+  <BandeauPage titre="Agenda" surtitre="Prochains rendez-vous" intro="Concerts, concours et prestations des Formations A et B." >
+    <p class="abonnement"><a class="bouton bouton--contour" href="/agenda.ics">S’abonner au calendrier</a></p>
+  </BandeauPage>
+  <section class="section">
+    <div class="conteneur conteneur-agenda">
+      <ul class="filtres" data-filtres aria-label="Filtrer par formation" hidden>
+        <li><button class="filtre" type="button" data-filtre="tous" aria-pressed="true">Tous</button></li>
+        <li><button class="filtre" type="button" data-filtre="A" aria-pressed="false">Formation A</button></li>
+        <li><button class="filtre" type="button" data-filtre="B" aria-pressed="false">Formation B</button></li>
+      </ul>
+      <p class="visuellement-cache" aria-live="polite" data-filtre-statut></p>
+      {prochains.length === 0 && <p class="vide">Aucun événement annoncé pour le moment. Revenez bientôt !</p>}
+      {[...parAnnee].map(([a, liste]) => (
+        <section class="annee" data-groupe>
+          <h2>{a}</h2>
+          <ul class="evts">{liste.map((e) => <EvtItem evt={e} />)}</ul>
+        </section>
+      ))}
+      <p class="vide" data-aucun hidden>Aucun événement annoncé pour cette formation.</p>
+      <p class="archives"><a class="lien-fleche" href="/agenda/archives/">Événements passés</a></p>
+    </div>
+  </section>
+</Base>
+<style>
+  .conteneur-agenda { max-width: 52rem; }
+  .annee + .annee { margin-top: var(--e-5); }
+  .annee h2 { color: var(--gris); font-size: var(--t-lg); }
+  .archives { margin-top: var(--e-5); }
+  .abonnement { margin-top: var(--e-4) !important; }
+  .abonnement .bouton { color: var(--blanc); }
+</style>

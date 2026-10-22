@@ -1,0 +1,76 @@
+# Build, test, then deploy dist/ to Infomaniak over SSH (rsync).
+# Nothing is uploaded if any step fails: the current site stays online.
+name: Déploiement
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PUBLIC_BETA: ${{ vars.PUBLIC_BETA || 'true' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Audit des dépendances
+        run: npm audit --omit=dev --audit-level=high
+      - name: Types, schémas et concordance admin
+        run: npm run check
+      - name: Tests unitaires
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Tests post-build (pages clés, liens internes, CSP, HTML)
+        run: npm run check:build
+      - name: Accessibilité (axe-core)
+        run: |
+          npx playwright install --with-deps chromium
+          npx serve@14.2.4 dist -l 4321 >/dev/null 2>&1 &
+          sleep 3
+          npm run check:a11y
+      - name: Envoi chez Infomaniak
+        env:
+          HAS_KEY: ${{ secrets.INFOMANIAK_SSH_KEY != '' }}
+          SSH_KEY: ${{ secrets.INFOMANIAK_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.INFOMANIAK_KNOWN_HOSTS }}
+          HOST: ${{ secrets.INFOMANIAK_HOST }}
+          USER: ${{ secrets.INFOMANIAK_USER }}
+          TARGET: ${{ secrets.INFOMANIAK_PATH }}
+        run: |
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::notice::Secrets Infomaniak absents : build validé, déploiement ignoré (voir docs/RUNBOOK.md)."
+            exit 0
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          rsync -az --delete --checksum --exclude '.well-known/' dist/ "$USER@$HOST:$TARGET/"
+          rm -f ~/.ssh/id_ed25519
+      - name: Contrôle de la mise en ligne
+        env:
+          HAS_KEY: ${{ secrets.INFOMANIAK_SSH_KEY != '' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://brassbandfribourg.ch/' }}
+        run: |
+          [ "$HAS_KEY" = "true" ] || exit 0
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE_URL")
+          echo "HTTP $code"
+          test "$code" = "200"

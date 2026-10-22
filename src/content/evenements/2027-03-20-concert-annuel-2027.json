@@ -1,0 +1,14 @@
+{
+  "titre": "Concert annuel 2027",
+  "date_debut": "2027-03-20T20:00",
+  "lieu": "Théâtre Équilibre",
+  "localite": "Fribourg",
+  "ensembles": [
+    "A",
+    "B"
+  ],
+  "type": "Concert",
+  "description": "Le rendez-vous de l'année : les Formations A et B sur la scène d'Équilibre, avec un soliste invité.",
+  "billetterie_url": "https://www.equilibre-nuithonie.ch/",
+  "annule": false
+}

@@ -1,0 +1,8 @@
+{
+  "nom": "Garage du Lac",
+  "logo": "../../assets/uploads/logo-garage-du-lac.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Sponsor",
+  "ordre": 5,
+  "actif": true
+}

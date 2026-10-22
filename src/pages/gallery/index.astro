@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import BandeauPage from '../../components/BandeauPage.astro';
+import { dateLongue } from '../../lib/dates.ts';
+
+const albums = (await getCollection('albums')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const libelle = (e: string) => (e === 'Les deux' ? 'Formations A et B' : `Formation ${e}`);
+---
+<Base titre="Photos" description="Les albums photo du Brass Band Fribourg : concerts, concours, camps et coulisses.">
+  <BandeauPage titre="Photos" surtitre="Galerie" intro="Concerts, concours, camps : revivez les grands moments du BBF." />
+  <section class="section">
+    <div class="conteneur grille">
+      {albums.map((a) => (
+        <article class="carte">
+          <Image src={a.data.couverture.src} alt="" width={640} widths={[400, 640, 960]} sizes="(min-width: 60rem) 22rem, 100vw" loading="lazy" />
+          <div class="carte__corps">
+            <h2 class="carte__titre"><a href={`/gallery/${a.id}/`}>{a.data.titre}</a></h2>
+            <p class="carte__meta">{dateLongue(a.data.date)} · {libelle(a.data.ensemble)} · {a.data.photos.length} photos</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

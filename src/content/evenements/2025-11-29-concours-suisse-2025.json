@@ -1,0 +1,12 @@
+{
+  "titre": "Concours Suisse des Brass Bands",
+  "date_debut": "2025-11-29T09:00",
+  "date_fin": "2025-11-30T18:00",
+  "lieu": "2M2C",
+  "localite": "Montreux",
+  "ensembles": [
+    "A"
+  ],
+  "type": "Concours",
+  "annule": false
+}

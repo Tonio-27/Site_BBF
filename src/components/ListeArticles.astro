@@ -1,0 +1,34 @@
+---
+import CarteArticle from './CarteArticle.astro';
+import { CATEGORIES_ARTICLE } from '../lib/schemas.ts';
+import { slugCategorie, type Article } from '../lib/contenu.ts';
+interface Props {
+  articles: Article[];
+  categorieActive?: string;
+  precedente?: string;
+  suivante?: string;
+  page?: number;
+  pages?: number;
+}
+const { articles, categorieActive, precedente, suivante, page, pages } = Astro.props;
+---
+<nav aria-label="Catégories">
+  <ul class="filtres">
+    <li><a class="filtre" href="/blog/" aria-current={!categorieActive ? 'page' : undefined}>Toutes</a></li>
+    {CATEGORIES_ARTICLE.map((c) => (
+      <li><a class="filtre" href={`/blog/categorie/${slugCategorie(c)}/`} aria-current={categorieActive === c ? 'page' : undefined}>{c}</a></li>
+    ))}
+  </ul>
+</nav>
+{articles.length ? (
+  <div class="grille">{articles.map((a) => <CarteArticle article={a} titreNiveau="h2" />)}</div>
+) : (
+  <p class="vide">Aucun article dans cette catégorie pour le moment.</p>
+)}
+{pages && pages > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    {precedente && <a class="bouton bouton--contour" href={precedente}>← Plus récents</a>}
+    <span>Page {page} sur {pages}</span>
+    {suivante && <a class="bouton bouton--contour" href={suivante}>Plus anciens →</a>}
+  </nav>
+)}

@@ -1,0 +1,8 @@
+{
+  "nom": "Loterie Romande",
+  "logo": "../../assets/uploads/logo-loterie-romande.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Institution",
+  "ordre": 4,
+  "actif": true
+}

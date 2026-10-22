@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Email from '../components/Email.astro';
+import { reglages } from '../lib/contenu.ts';
+
+const r = await reglages();
+const comite = (await getCollection('comite')).sort((a, b) => a.data.ordre - b.data.ordre);
+const reseaux = [
+  { nom: 'Facebook', url: r.facebook },
+  { nom: 'Instagram', url: r.instagram },
+  { nom: 'YouTube', url: r.youtube },
+].filter((x) => x.url);
+---
+<Base titre="Contact" description="Contacter le Brass Band Fribourg : président, responsables des formations, secrétariat, adresse postale.">
+  <BandeauPage titre="Contact" surtitre="Écrivez-nous" intro="Une question, une envie de jouer avec nous ou d'organiser une prestation ? Choisissez la bonne personne ci-dessous." />
+  <section class="section">
+    <div class="conteneur deux">
+      <ul class="contacts">
+        {comite.filter((c) => c.data.email).map(({ data: c }) => (
+          <li>
+            <h2>{c.fonction}</h2>
+            <p>{c.prenom} {c.nom}</p>
+            <p><Email adresse={c.email!} /></p>
+            {c.telephone && c.afficher_telephone && <p><a href={`tel:${c.telephone.replace(/\s/g, '')}`}>{c.telephone}</a></p>}
+          </li>
+        ))}
+      </ul>
+      <aside class="infos">
+        <h2>Adresse postale</h2>
+        <address>{r.adresse.split('\n').map((l) => <>{l}<br /></>)}</address>
+        <h2>Renseignements généraux</h2>
+        <p><Email adresse={r.email_general} /></p>
+        <h2>Réseaux sociaux</h2>
+        <ul>{reseaux.map((x) => <li><a href={x.url} rel="noopener">{x.nom}</a></li>)}</ul>
+      </aside>
+    </div>
+  </section>
+</Base>
+<style>
+  .deux { display: grid; gap: var(--e-5); }
+  @media (min-width: 60rem) { .deux { grid-template-columns: 1fr 20rem; } }
+  .contacts { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+  .contacts li { background: var(--blanc); box-shadow: var(--ombre); border-radius: var(--rayon-lg); padding: var(--e-4); border-top: 4px solid var(--rouge); }
+  .contacts h2 { font-size: var(--t-lg); margin-bottom: var(--e-2); }
+  .contacts p { margin: 0 0 var(--e-1); }
+  .infos { background: var(--noir); color: var(--blanc); border-radius: var(--rayon-lg); padding: var(--e-4); align-self: start; }
+  .infos :global(a) { color: var(--rouge-clair); }
+  .infos h2 { font-size: var(--t-sm); text-transform: uppercase; letter-spacing: .12em; color: #cfcfcf; margin-top: var(--e-4); }
+  .infos h2:first-child { margin-top: 0; }
+  address { font-style: normal; }
+  .infos ul { padding-left: 1.2em; }
+</style>

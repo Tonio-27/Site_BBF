@@ -1,0 +1,52 @@
+---
+import Logo from './Logo.astro';
+const liens = [
+  { href: '/', label: 'Accueil' },
+  { href: '/agenda/', label: 'Agenda' },
+  { href: '/blog/', label: 'Actualités' },
+  { href: '/presentation/', label: 'Le BBF' },
+  { href: '/gallery/', label: 'Photos' },
+  { href: '/partenaires/', label: 'Partenaires' },
+  { href: '/presse/', label: 'Presse' },
+  { href: '/contact/', label: 'Contact' },
+];
+const chemin = Astro.url.pathname;
+const actif = (href: string) => (href === '/' ? chemin === '/' : chemin.startsWith(href));
+---
+<header class="entete sur-noir">
+  <div class="conteneur entete__barre">
+    <a href="/" class="entete__logo"><Logo /><span class="visuellement-cache">Brass Band Fribourg — accueil</span></a>
+    <button class="entete__menu" type="button" aria-expanded="false" aria-controls="nav-principale">
+      <span class="entete__burger" aria-hidden="true"></span>
+      <span>Menu</span>
+    </button>
+    <nav id="nav-principale" class="nav" aria-label="Navigation principale">
+      <ul>
+        {liens.map((l) => <li><a href={l.href} aria-current={actif(l.href) ? 'page' : undefined}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .entete { background: var(--noir); color: var(--blanc); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--gris-fonce); }
+  .entete__barre { display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); min-height: 4.5rem; flex-wrap: wrap; }
+  .entete__logo { color: var(--blanc); display: block; }
+  .entete__logo :global(.logo) { width: 11rem; height: auto; }
+  .nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--e-1); flex-wrap: wrap; }
+  .nav a { color: var(--blanc); text-decoration: none; font-weight: 600; padding: 0.5rem 0.7rem; border-radius: var(--rayon); display: block; font-size: 0.95rem; }
+  .nav a:hover { color: var(--rouge-clair); }
+  .nav a[aria-current='page'] { box-shadow: inset 0 -3px 0 var(--rouge); }
+  .entete__menu { display: none; background: none; border: 2px solid var(--gris-fonce); color: var(--blanc); font: inherit; font-weight: 700; padding: 0.45rem 0.8rem; border-radius: var(--rayon); cursor: pointer; align-items: center; gap: var(--e-2); }
+  .entete__burger, .entete__burger::before, .entete__burger::after { display: block; width: 1.2rem; height: 2px; background: currentColor; position: relative; content: ''; }
+  .entete__burger::before { position: absolute; top: -6px; }
+  .entete__burger::after { position: absolute; top: 6px; }
+  @media (max-width: 62rem) {
+    :global(html.js) .entete__menu { display: inline-flex; }
+    :global(html.js) .nav { display: none; width: 100%; padding-bottom: var(--e-3); }
+    :global(html.js) .nav.ouvert { display: block; }
+    .nav ul { flex-direction: column; }
+    .nav a { padding: 0.8rem 0.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--gris-fonce); border-radius: 0; }
+    .nav a[aria-current='page'] { box-shadow: inset 4px 0 0 var(--rouge); padding-left: 1rem; }
+  }
+</style>

@@ -1,0 +1,8 @@
+{
+  "nom": "Boulangerie du Bourg",
+  "logo": "../../assets/uploads/logo-boulangerie-du-bourg.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Sponsor",
+  "ordre": 7,
+  "actif": true
+}

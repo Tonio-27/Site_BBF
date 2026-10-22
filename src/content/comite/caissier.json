@@ -1,0 +1,8 @@
+{
+  "prenom": "Marc",
+  "nom": "Python",
+  "fonction": "Caissier",
+  "email": "caisse@brassbandfribourg.ch",
+  "afficher_telephone": false,
+  "ordre": 5
+}

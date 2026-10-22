@@ -1,0 +1,14 @@
+{
+  "titre": "Concours Suisse des Brass Bands",
+  "date_debut": "2026-11-28T09:00",
+  "date_fin": "2026-11-29T18:00",
+  "lieu": "2M2C",
+  "localite": "Montreux",
+  "ensembles": [
+    "A"
+  ],
+  "type": "Concours",
+  "description": "La Formation A défend les couleurs fribourgeoises en Excellence. Ordre de passage communiqué une semaine avant le concours.\n\nVenez nous soutenir !",
+  "billetterie_url": "https://www.brassbandwettbewerb.ch/",
+  "annule": false
+}

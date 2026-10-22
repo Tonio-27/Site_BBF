@@ -1,0 +1,8 @@
+{
+  "nom": "Brasserie Fribourgeoise",
+  "logo": "../../assets/uploads/logo-brasserie-fribourgeoise.svg",
+  "site_web": "https://example.ch/",
+  "categorie": "Sponsor",
+  "ordre": 9,
+  "actif": true
+}

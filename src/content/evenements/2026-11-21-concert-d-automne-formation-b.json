@@ -1,0 +1,12 @@
+{
+  "titre": "Concert d'automne de la Formation B",
+  "date_debut": "2026-11-21T20:00",
+  "lieu": "Salle de la Prillaz",
+  "localite": "Estavayer-le-Lac",
+  "ensembles": [
+    "B"
+  ],
+  "type": "Concert",
+  "description": "Un programme varié, de la marche au film, pour lancer la saison. Entrée libre, collecte à la sortie.",
+  "annule": false
+}
