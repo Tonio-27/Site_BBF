@@ -8,7 +8,7 @@ const axe = readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.mi
 const BASE = `http://localhost:${process.env.PORT ?? 4321}`;
 const PAGES = [
   '/', '/agenda/', '/agenda/archives/', '/blog/', '/presentation/', '/gallery/',
-  '/partenaires/', '/presse/', '/contact/', '/404.html',
+  '/partenaires/', '/presse/', '/contact/', '/404.html', '/admin/effectifs/',
 ];
 
 const navigateur = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});

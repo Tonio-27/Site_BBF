@@ -1,6 +1,7 @@
 // Installs the pinned Sveltia CMS into public/admin/ so that /admin never
 // depends on a third-party CDN: the UI translations (unpkg) and the fonts
-// (jsDelivr) the editor would otherwise fetch are copied next to it.
+// (jsDelivr) the editor would otherwise fetch are copied next to it, along
+// with SortableJS for the "Effectifs" board.
 // Usage: npm run cms:update   (after Renovate bumps @sveltia/cms)
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -37,5 +38,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   for (const f of readdirSync(`${CMS}/locales`)) if (['fr.json', 'de.json', 'en-US.json'].includes(f)) copyFileSync(`${CMS}/locales/${f}`, `${ADMIN}/locales/${f}`);
   mkdirSync(`${ADMIN}/fonts`, { recursive: true });
   for (const [, npm, local] of POLICES) copyFileSync(`node_modules/${npm}`, `${ADMIN}/fonts/${local}`);
+  // Drag-and-drop library for the "Effectifs" board.
+  mkdirSync(`${ADMIN}/vendor`, { recursive: true });
+  copyFileSync('node_modules/sortablejs/Sortable.min.js', `${ADMIN}/vendor/sortable.min.js`);
   console.log('✓ Sveltia CMS installé dans public/admin/ (traductions et polices locales).');
 }

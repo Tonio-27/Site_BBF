@@ -21,7 +21,8 @@ npm run dev        # http://localhost:4321
 | `npm run check:build` | Après build : pages clés, liens internes, respect de la CSP, HTML valide |
 | `npm run check:a11y` | Accessibilité axe-core (servir `dist/` sur le port 4321 avant) |
 | `npm run verify` | Tout ce qui précède sauf l'accessibilité |
-| `npm run cms:update` | Recopie `sveltia-cms.js` depuis la version épinglée dans `package.json` |
+| `npm run cms:update` | Réinstalle Sveltia (version épinglée), ses traductions et polices, et SortableJS dans `public/admin/` |
+| `npm run demo` | Construit `dist-demo/` : site autonome + éditeur et tableau des effectifs en bac à sable pré-rempli |
 | `npm run demo:images` | Régénère les images de démonstration |
 
 ## Architecture
@@ -39,7 +40,8 @@ npm run dev        # http://localhost:4321
 - `src/lib/remark-safe-content.mjs` : supprime le HTML brut du Markdown, transforme un lien YouTube seul en vidéo chargée au clic (youtube-nocookie).
 - `public/js/` : seul JavaScript public (≈ 5 Ko) : menu mobile, filtre agenda, visionneuse, e-mails anti-spam, vidéos.
 - `public/.htaccess` : HTTPS, en-têtes de sécurité (CSP stricte), cache, redirections 301.
-- `public/admin/` : Sveltia CMS (copie locale épinglée) + `config.yml` (menus en français).
+- `public/admin/` : Sveltia CMS (copie locale épinglée, traductions et polices locales) + `config.yml` (menus en français, validé contre le schéma JSON de Sveltia).
+- `src/pages/admin/effectifs.astro` + `public/admin/effectifs/` : tableau « Effectifs » (glisser-déposer des musiciens par pupitre). Il lit et écrit les mêmes fichiers `src/content/musiciens/*.json` que Sveltia, via l'API GitHub (session Sveltia, un seul commit par enregistrement, refus si un fichier a changé entre-temps). En démo, il partage le bac à sable de Sveltia (stockage privé du navigateur).
 
 ### Règles
 
@@ -65,7 +67,9 @@ npm run dev        # http://localhost:4321
 | `@sveltia/cms` (dev) | Source de la copie locale de l'admin, mise à jour par Renovate |
 | `vitest`, `@astrojs/check`, `typescript` (dev) | Tests et types |
 | `html-validate`, `playwright`, `axe-core` (dev) | Validation HTML et accessibilité en CI |
-| `js-yaml` (dev) | Lecture de `config.yml` par le contrôle de concordance |
+| `js-yaml`, `ajv` (dev) | Lecture de `config.yml` et validation contre le schéma de Sveltia |
+| `sortablejs` (dev) | Glisser-déposer du tableau des effectifs (copié dans `public/admin/vendor/`, 45 Ko, MIT) |
+| `@fontsource*` (dev) | Polices de l'interface Sveltia, copiées localement (pas de CDN) |
 
 Mises à jour : Renovate, une PR groupée par mois, délai de 7 jours, fusion automatique si la CI est verte (sauf Sveltia CMS : test manuel de `/admin`).
 

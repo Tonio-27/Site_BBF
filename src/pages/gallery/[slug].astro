@@ -28,7 +28,7 @@ const photos = await Promise.all(
       {photos.map((p, i) => (
         <li>
           <a href={p.grande} data-legende={p.legende ?? ''} data-index={i}>
-            <Image src={p.image} alt={p.alt} width={480} widths={[320, 480, 720]} sizes="(min-width: 60rem) 18rem, 50vw" loading="lazy" />
+            <Image src={p.image} alt={p.alt} width={480} widths={[360, 720]} sizes="(min-width: 60rem) 18rem, 50vw" loading="lazy" />
           </a>
         </li>
       ))}

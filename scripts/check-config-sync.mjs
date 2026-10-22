@@ -4,8 +4,22 @@ import { readFileSync } from 'node:fs';
 import { load } from 'js-yaml';
 import { z } from 'astro/zod';
 import { schemas } from '../src/lib/schemas.ts';
+import Ajv from 'ajv';
 
 const config = load(readFileSync('public/admin/config.yml', 'utf8'));
+
+// 1. The file must follow Sveltia's own JSON schema (catches typos in options).
+const schemaCms = JSON.parse(readFileSync('node_modules/@sveltia/cms/schema/sveltia-cms.json', 'utf8'));
+const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
+if (!ajv.validate(schemaCms, config)) {
+  const details = ajv.errors
+    .filter((e) => e.keyword === 'additionalProperties' || e.keyword === 'enum' || e.keyword === 'required')
+    .map((e) => `${e.instancePath || '/'} ${e.message} ${JSON.stringify(e.params)}`);
+  console.error(`✗ config.yml ne respecte pas le schéma de Sveltia CMS :\n  - ${[...new Set(details)].slice(0, 20).join('\n  - ')}`);
+  process.exit(1);
+}
+
+// 2. Fields and closed lists must match the Zod schemas.
 const fakeImage = () => z.string();
 
 // CMS entry → schema name. `body` in the CMS is the Markdown body, not a front matter field.
@@ -71,6 +85,7 @@ function comparer(chemin, champsCms, schema) {
 
 const vus = new Set();
 for (const col of config.collections) {
+  if (col.divider) continue;
   const entrees = col.files ? col.files.map((f) => [`${col.name}/${f.name}`, f.fields]) : [[col.name, col.fields]];
   for (const [cle, champs] of entrees) {
     const nomSchema = correspondances[cle];
@@ -88,4 +103,4 @@ if (erreurs.length) {
   console.error(`✗ config.yml et les schémas Zod divergent :\n  - ${erreurs.join('\n  - ')}`);
   process.exit(1);
 }
-console.log(`✓ config.yml et schémas Zod concordent (${vus.size} schémas vérifiés).`);
+console.log(`✓ config.yml valide (schéma Sveltia) et concordant avec les schémas Zod (${vus.size} schémas vérifiés).`);

@@ -15,6 +15,7 @@ backend:
     uploadMedia: "content: ajout du fichier « {{path}} »"
     deleteMedia: "content: suppression du fichier « {{path}} »"
 
+app_title: Édition du site BBF
 site_url: https://brassbandfribourg.ch
 display_url: https://brassbandfribourg.ch
 logo:
@@ -45,6 +46,9 @@ collections:
   - name: articles
     label: Actualités
     label_singular: Article
+    icon: newspaper
+    thumbnail: image.src
+    preview_path: "{{slug}}/"
     description: Les articles du blog. Cocher « Brouillon » pour préparer un article sans le publier.
     folder: src/content/articles
     media_folder: /src/assets/uploads
@@ -58,9 +62,11 @@ collections:
     summary: "{{titre}} — {{date}}{{brouillon | ternary(' (brouillon)', '')}}"
     sortable_fields: { fields: [date, titre, categorie], default: { field: date, direction: descending } }
     view_filters:
-      - { label: Brouillons, field: brouillon, pattern: true }
+      - { name: publies, label: Publiés, field: brouillon, ne: true }
+      - { name: brouillons, label: Brouillons, field: brouillon, eq: true }
     view_groups:
-      - { label: Catégorie, field: categorie }
+      - { name: categorie, label: Catégorie, field: categorie }
+      - { name: annee, label: Année, field: date, pattern: '\d{4}' }
     fields:
       - { name: titre, label: Titre, widget: string }
       - name: slug
@@ -90,6 +96,8 @@ collections:
   - name: evenements
     label: Agenda
     label_singular: Événement
+    icon: event
+    thumbnail: false
     description: Concerts, concours et prestations. Un événement passé passe automatiquement dans les archives.
     folder: src/content/evenements
     media_folder: /src/assets/uploads
@@ -102,10 +110,23 @@ collections:
     identifier_field: titre
     summary: "{{date_debut | date('DD.MM.YYYY')}} · {{titre}} · {{localite}}{{annule | ternary(' — ANNULÉ', '')}}"
     sortable_fields: { fields: [date_debut, titre], default: { field: date_debut, direction: descending } }
+    table_columns:
+      - { field: date_debut, label: Date }
+      - titre
+      - { field: localite, label: Lieu }
+      - { field: ensembles, label: Formation }
+      - type
+      - { field: annule, label: Annulé }
     view_filters:
-      - { label: Formation A, field: ensembles, pattern: A }
-      - { label: Formation B, field: ensembles, pattern: B }
-      - { label: Annulés, field: annule, pattern: true }
+      filters:
+        - { name: a_venir, label: À venir, field: date_debut, gte: "{{today}}" }
+        - { name: passes, label: Passés, field: date_debut, lt: "{{today}}" }
+        - { name: a, label: Formation A, field: ensembles, pattern: A }
+        - { name: b, label: Formation B, field: ensembles, pattern: B }
+        - { name: annules, label: Annulés, field: annule, eq: true }
+      default: a_venir
+    view_groups:
+      - { name: annee, label: Année, field: date_debut, pattern: '\d{4}' }
     fields:
       - { name: titre, label: Titre, widget: string, hint: "Ex. « Concours Suisse des Brass Bands »" }
       - { name: date_debut, label: Début, widget: datetime, format: "YYYY-MM-DDTHH:mm", hint: "Date et heure, heure suisse." }
@@ -125,11 +146,60 @@ collections:
           - { name: alt, label: Description de l'image, widget: string }
       - { name: annule, label: Annulé, widget: boolean, default: false, required: false, hint: "Cocher plutôt que supprimer : le site affiche « Annulé »." }
 
+  # ------------------------------------------------------------------ Photos
+  - name: albums
+    label: Photos
+    label_singular: Album
+    icon: photo_library
+    thumbnail: couverture.src
+    editor: { preview: false }
+    description: "Albums de la galerie. 60 photos au maximum par album : l'album complet va sur le Drive (lien externe)."
+    folder: src/content/albums
+    media_folder: /src/assets/uploads
+    public_folder: ../../assets/uploads
+    create: true
+    extension: json
+    format: json
+    path: "{{slug}}"
+    slug: "{{titre}}"
+    identifier_field: titre
+    summary: "{{titre}} — {{date}}"
+    sortable_fields: { fields: [date, titre], default: { field: date, direction: descending } }
+    fields:
+      - { name: titre, label: Titre, widget: string }
+      - { name: date, label: Date, widget: datetime, time_format: false, format: YYYY-MM-DD, default: "{{now}}" }
+      - { name: ensemble, label: Formation, widget: select, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }, { label: Les deux, value: Les deux }], default: Les deux }
+      - name: couverture
+        label: Photo de couverture
+        widget: object
+        fields:
+          - { name: src, label: Image, widget: image }
+          - { name: alt, label: Description de l'image, widget: string }
+      - name: photos
+        label: Photos
+        label_singular: Photo
+        widget: list
+        max: 60
+        hint: "Glisser plusieurs photos d'un coup dans le champ image. 60 photos maximum."
+        summary: "{{fields.legende}}"
+        fields:
+          - { name: image, label: Photo, widget: image }
+          - { name: legende, label: Légende, widget: string, required: false }
+      - { name: lien_externe, label: Lien vers l'album complet, widget: string, type: url, required: false, hint: "Ex. dossier partagé sur le Drive du BBF." }
+
+  - divider: true
+
   # ------------------------------------------------------------------ Musiciens
   - name: musiciens
     label: Musiciens
     label_singular: Musicien
-    description: Les effectifs des Formations A et B, affichés par pupitre sur la page « Le BBF ».
+    icon: groups
+    description: "Pour déplacer, ajouter ou retirer des musiciens en quelques clics, utilisez le tableau « Effectifs » (bouton noir en bas à gauche). Ici : vue tableau, édition en masse et fiches détaillées."
+    editor: { preview: false }
+    thumbnail: false
+    table_columns: [prenom, nom, ensemble, pupitre, { field: actif, label: Actif }]
+    bulk_edit: { fields: [ensemble, pupitre, ordre, actif] }
+    reorder: { key: ordre, group: pupitre }
     folder: src/content/musiciens
     create: true
     extension: json
@@ -140,12 +210,17 @@ collections:
     summary: "{{prenom}} {{nom}} — {{pupitre}} ({{ensemble}}){{actif | ternary('', ' — inactif')}}"
     sortable_fields: { fields: [nom, pupitre, ensemble], default: { field: nom } }
     view_groups:
-      - { label: Formation, field: ensemble }
-      - { label: Pupitre, field: pupitre }
+      groups:
+        - { name: pupitre, label: Pupitre, field: pupitre }
+        - { name: ensemble, label: Formation, field: ensemble }
+      default: pupitre
     view_filters:
-      - { label: Formation A, field: ensemble, pattern: A }
-      - { label: Formation B, field: ensemble, pattern: B }
-      - { label: Inactifs, field: actif, pattern: false }
+      filters:
+        - { name: actifs, label: Actifs, field: actif, ne: false }
+        - { name: a, label: Formation A, field: ensemble, eq: A }
+        - { name: b, label: Formation B, field: ensemble, eq: B }
+        - { name: anciens, label: Anciens musiciens, field: actif, eq: false }
+      default: actifs
     fields:
       - { name: prenom, label: Prénom, widget: string }
       - { name: nom, label: Nom, widget: string }
@@ -184,6 +259,8 @@ collections:
   - name: directeurs
     label: Directeurs
     label_singular: Directeur
+    icon: person
+    thumbnail: photo.src
     folder: src/content/directeurs
     media_folder: /src/assets/uploads
     public_folder: ../../assets/uploads
@@ -214,6 +291,11 @@ collections:
   - name: comite
     label: Comité
     label_singular: Membre du comité
+    icon: diversity_3
+    editor: { preview: false }
+    table_columns: [fonction, prenom, nom, email]
+    reorder: { key: ordre }
+    bulk_edit: { fields: [fonction, afficher_telephone] }
     description: Les contacts affichés sur les pages « Contact » et « Le BBF ». Utiliser les adresses de fonction, jamais d'adresse privée.
     folder: src/content/comite
     create: true
@@ -232,48 +314,17 @@ collections:
       - { name: afficher_telephone, label: Afficher le téléphone sur le site, widget: boolean, default: false, required: false, hint: "Uniquement avec l'accord de la personne." }
       - { name: ordre, label: Ordre d'affichage, widget: number, value_type: int, default: 99 }
 
-  # ------------------------------------------------------------------ Photos
-  - name: albums
-    label: Photos
-    label_singular: Album
-    description: "Albums de la galerie. 60 photos au maximum par album : l'album complet va sur le Drive (lien externe)."
-    folder: src/content/albums
-    media_folder: /src/assets/uploads
-    public_folder: ../../assets/uploads
-    create: true
-    extension: json
-    format: json
-    path: "{{slug}}"
-    slug: "{{titre}}"
-    identifier_field: titre
-    summary: "{{titre}} — {{date}}"
-    sortable_fields: { fields: [date, titre], default: { field: date, direction: descending } }
-    fields:
-      - { name: titre, label: Titre, widget: string }
-      - { name: date, label: Date, widget: datetime, time_format: false, format: YYYY-MM-DD, default: "{{now}}" }
-      - { name: ensemble, label: Formation, widget: select, options: [{ label: Formation A, value: A }, { label: Formation B, value: B }, { label: Les deux, value: Les deux }], default: Les deux }
-      - name: couverture
-        label: Photo de couverture
-        widget: object
-        fields:
-          - { name: src, label: Image, widget: image }
-          - { name: alt, label: Description de l'image, widget: string }
-      - name: photos
-        label: Photos
-        label_singular: Photo
-        widget: list
-        max: 60
-        hint: "Glisser plusieurs photos d'un coup dans le champ image. 60 photos maximum."
-        summary: "{{fields.legende}}"
-        fields:
-          - { name: image, label: Photo, widget: image }
-          - { name: legende, label: Légende, widget: string, required: false }
-      - { name: lien_externe, label: Lien vers l'album complet, widget: string, type: url, required: false, hint: "Ex. dossier partagé sur le Drive du BBF." }
+  - divider: true
 
   # ------------------------------------------------------------------ Partenaires
   - name: partenaires
     label: Partenaires
     label_singular: Partenaire
+    icon: handshake
+    thumbnail: logo
+    editor: { preview: false }
+    reorder: { key: ordre, group: categorie }
+    bulk_edit: { fields: [categorie, ordre, actif] }
     folder: src/content/partenaires
     media_folder: /src/assets/uploads
     public_folder: ../../assets/uploads
@@ -285,7 +336,10 @@ collections:
     summary: "{{nom}} — {{categorie}}{{actif | ternary('', ' — inactif')}}"
     sortable_fields: { fields: [ordre, nom, categorie], default: { field: ordre } }
     view_groups:
-      - { label: Catégorie, field: categorie }
+      - { name: categorie, label: Catégorie, field: categorie }
+    view_filters:
+      - { name: actifs, label: Actifs, field: actif, ne: false }
+      - { name: inactifs, label: Inactifs, field: actif, eq: false }
     fields:
       - { name: nom, label: Nom, widget: string }
       - { name: logo, label: Logo, widget: image, hint: "SVG ou PNG à fond transparent de préférence." }
@@ -298,6 +352,9 @@ collections:
   - name: presse
     label: Presse
     label_singular: Article de presse
+    icon: campaign
+    editor: { preview: false }
+    table_columns: [date, media, titre]
     folder: src/content/presse
     create: true
     extension: json
@@ -315,9 +372,12 @@ collections:
       - { name: fichier, label: Fichier PDF, widget: file, required: false, media_folder: /public/documents, public_folder: /documents, hint: "Le PDF de l'article OU le lien ci-dessous (au moins l'un des deux)." }
       - { name: lien, label: Lien vers l'article en ligne, widget: string, type: url, required: false }
 
+  - divider: true
+
   # ------------------------------------------------------------------ Pages
   - name: pages
     label: Pages
+    icon: description
     description: Les textes fixes du site.
     files:
       - name: accueil
@@ -416,6 +476,8 @@ collections:
   # ------------------------------------------------------------------ Réglages
   - name: reglages
     label: Réglages
+    icon: settings
+    editor: { preview: false }
     description: Coordonnées, réseaux sociaux, référencement et bandeau d'annonce.
     files:
       - name: reglages

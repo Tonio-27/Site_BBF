@@ -1,10 +1,11 @@
 // Builds dist-demo/: a self-contained copy of dist/ for showing the site
 // anywhere (shared link, USB stick, sub-folder) without the real domain.
 // - every internal URL becomes relative and points to an explicit index.html;
-// - /admin runs Sveltia CMS on its in-memory "test-repo" backend: editors can
-//   click through every menu and form, nothing is saved.
+// - /admin runs Sveltia CMS on its "test-repo" backend, pre-filled with the
+//   demo content (seed): editors can try everything; changes stay in their
+//   own browser. The "Effectifs" board shares that same sandbox.
 // Usage: npm run demo   (builds, then writes dist-demo/)
-import { cpSync, readFileSync, writeFileSync, rmSync, existsSync, statSync, readdirSync, renameSync } from 'node:fs';
+import { cpSync, readFileSync, writeFileSync, rmSync, existsSync, statSync, readdirSync, renameSync, mkdirSync } from 'node:fs';
 import { join, relative, posix } from 'node:path';
 import { load } from 'js-yaml';
 
@@ -76,8 +77,30 @@ rmSync(cfg);
 const admin = join(OUT, 'admin/index.html');
 writeFileSync(
   admin,
-  readFileSync(admin, 'utf8').replace('</head>', '  <link href="config.json" type="application/json" rel="cms-config-url" />\n  </head>'),
+  readFileSync(admin, 'utf8')
+    .replace('<html lang="fr">', '<html lang="fr" data-demo>')
+    .replace(
+      '</head>',
+      '  <link href="config.json" type="application/json" rel="cms-config-url" />\n    <link href="seed/manifest.json" rel="cms-seed-url" />\n  </head>',
+    ),
 );
+
+// Seed for the sandbox: the repository files Sveltia would see on GitHub.
+const SEED = join(OUT, 'admin/seed');
+const graines = [];
+for (const dossier of ['src/content', 'src/assets/uploads', 'public/documents']) {
+  for (const f of fichiers(dossier)) {
+    const chemin = f.split('\\').join('/');
+    mkdirSync(join(SEED, posix.dirname(chemin)), { recursive: true });
+    cpSync(f, join(SEED, chemin));
+    graines.push(chemin);
+  }
+}
+writeFileSync(join(SEED, 'manifest.json'), JSON.stringify({ files: graines }, null, 2));
+
+// The musicians board works on the same sandbox instead of GitHub.
+const effectifs = join(OUT, 'admin/effectifs/index.html');
+writeFileSync(effectifs, readFileSync(effectifs, 'utf8').replace('"mode":"github"', '"mode":"demo"'));
 
 const n = [...fichiers(OUT)].length;
 console.log(`✓ Démo autonome prête dans ${OUT}/ (${n} fichiers). Ouvrir ${OUT}/index.html via un petit serveur local.`);

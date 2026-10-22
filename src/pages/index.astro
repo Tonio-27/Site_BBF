@@ -3,6 +3,7 @@ import { getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import EvtItem from '../components/EvtItem.astro';
+import LogoPartenaire from '../components/LogoPartenaire.astro';
 import CarteArticle from '../components/CarteArticle.astro';
 import BlocsAppel from '../components/BlocsAppel.astro';
 import { articlesPublies, evenements, partenairesActifs, reglages } from '../lib/contenu.ts';
@@ -89,7 +90,7 @@ const partenaires = await partenairesActifs();
           {partenaires.map((p) => (
             <li>
               <a href={p.data.site_web ?? '/partenaires/'} rel="noopener">
-                <Image src={p.data.logo} alt={p.data.nom} width={200} height={100} loading="lazy" />
+                <LogoPartenaire logo={p.data.logo} nom={p.data.nom} largeur={200} />
               </a>
             </li>
           ))}

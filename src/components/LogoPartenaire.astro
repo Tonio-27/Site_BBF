@@ -1,0 +1,12 @@
+---
+// Partner logo: SVG files are served as-is (already sharp at any size);
+// raster logos go through Astro's optimisation.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+interface Props { logo: ImageMetadata; nom: string; largeur: number }
+const { logo, nom, largeur } = Astro.props;
+const hauteur = Math.round(largeur / 2);
+---
+{logo.format === 'svg'
+  ? <img src={logo.src} alt={nom} width={largeur} height={hauteur} loading="lazy" decoding="async" />
+  : <Image src={logo} alt={nom} width={largeur} height={hauteur} loading="lazy" />}

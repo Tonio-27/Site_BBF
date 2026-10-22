@@ -1,0 +1,141 @@
+---
+// "Effectifs" board: drag-and-drop editor for musicians, next to Sveltia CMS.
+// Static page; all logic runs in the browser (public/admin/effectifs/effectifs.js)
+// and saves through the GitHub API with the editor's Sveltia session.
+import { readFileSync, readdirSync } from 'node:fs';
+import { load } from 'js-yaml';
+import { PUPITRES } from '../../lib/pupitres.ts';
+
+const DOSSIER = 'src/content/musiciens';
+const config = load(readFileSync('public/admin/config.yml', 'utf8')) as { backend: { name: string; repo?: string; branch?: string } };
+const donnees = {
+  mode: config.backend.name === 'github' ? 'github' : 'demo',
+  depot: config.backend.repo ?? '',
+  branche: config.backend.branch ?? 'main',
+  dossier: DOSSIER,
+  pupitres: PUPITRES,
+  // Snapshot used only when no live storage is available (offline demo).
+  fichiers: readdirSync(DOSSIER)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => ({ chemin: `${DOSSIER}/${f}`, texte: readFileSync(`${DOSSIER}/${f}`, 'utf8') })),
+};
+---
+<!doctype html>
+<html lang="fr-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Effectifs — édition BBF</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/admin/effectifs/effectifs.css" />
+    <link rel="cms-seed-url" href="/admin/seed/manifest.json" />
+  </head>
+  <body>
+    <script type="application/json" id="donnees" set:html={JSON.stringify(donnees)} />
+    <header class="barre">
+      <a class="barre__retour" href="/admin/">← Éditeur du site</a>
+      <h1 class="barre__titre">Effectifs</h1>
+      <div class="onglets" role="tablist" aria-label="Formation">
+        <button type="button" role="tab" class="onglet" data-onglet="A" aria-selected="true">Formation A <span class="onglet__nb" data-nb="A"></span></button>
+        <button type="button" role="tab" class="onglet" data-onglet="B" aria-selected="false">Formation B <span class="onglet__nb" data-nb="B"></span></button>
+      </div>
+      <a class="barre__voir" href="/presentation/#formation-a" data-lien-site>Voir sur le site ↗</a>
+    </header>
+
+    <main>
+    <div class="outils" role="toolbar" aria-label="Outils">
+      <label class="recherche">
+        <span class="visuellement-cache">Rechercher un musicien</span>
+        <input type="search" id="recherche" placeholder="Rechercher un musicien…  ( / )" autocomplete="off" />
+      </label>
+      <span class="outils__resultat" id="resultat" aria-live="polite"></span>
+      <span class="outils__espace"></span>
+      <button type="button" class="bouton" id="btn-annuler" title="Annuler (Ctrl+Z)" disabled>↶ Annuler</button>
+      <button type="button" class="bouton" id="btn-retablir" title="Rétablir (Ctrl+Maj+Z)" disabled>↷ Rétablir</button>
+      <button type="button" class="bouton" id="btn-import">＋ Ajouter une liste</button>
+      <button type="button" class="bouton" id="btn-anciens" aria-expanded="false" aria-controls="anciens">Anciens musiciens <span class="pastille" id="nb-anciens">0</span></button>
+    </div>
+
+    <div class="plateau" id="plateau" aria-describedby="aide">
+      <p class="chargement" id="chargement">Chargement des effectifs…</p>
+    </div>
+
+    <aside class="anciens" id="anciens" hidden aria-labelledby="anciens-titre">
+      <div class="anciens__tete">
+        <h2 id="anciens-titre">Anciens musiciens</h2>
+        <button type="button" class="bouton bouton--icone" id="btn-fermer-anciens" aria-label="Fermer">✕</button>
+      </div>
+      <p class="anciens__aide">Retirés de l’effectif mais conservés. Glissez-les dans un pupitre ou cliquez sur « Réintégrer ».</p>
+      <ul class="anciens__liste" id="liste-anciens"></ul>
+    </aside>
+
+    <p class="aide" id="aide">
+      <strong>Astuces :</strong> glissez un musicien vers un autre pupitre, ou sur l’onglet de l’autre formation.
+      Au clavier : <kbd>Alt</kbd>+<kbd>↑</kbd>/<kbd>↓</kbd> pour monter ou descendre, <kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> pour changer de pupitre,
+      <kbd>Entrée</kbd> pour modifier, <kbd>Suppr</kbd> pour retirer, <kbd>Ctrl</kbd>+<kbd>S</kbd> pour enregistrer.
+    </p>
+    </main>
+
+    <div class="enregistrer" id="barre-enregistrer" role="region" aria-label="Modifications à enregistrer" hidden>
+      <div class="enregistrer__texte">
+        <strong id="nb-modifs"></strong>
+        <button type="button" class="lien" id="btn-detail" aria-expanded="false" aria-controls="detail">Voir le détail</button>
+        <ul class="enregistrer__detail" id="detail" hidden></ul>
+      </div>
+      <button type="button" class="bouton" id="btn-tout-annuler">Tout annuler</button>
+      <button type="button" class="bouton bouton--principal" id="btn-enregistrer">Enregistrer sur le site</button>
+    </div>
+
+    <div class="annonce" id="annonce" role="status" aria-live="polite"></div>
+
+    <dialog class="dialogue" id="dialogue-musicien" aria-labelledby="dm-titre">
+      <form method="dialog" id="form-musicien">
+        <h2 id="dm-titre">Modifier le musicien</h2>
+        <div class="champs">
+          <label>Prénom <input type="text" name="prenom" id="dm-prenom" required autocomplete="off" /></label>
+          <label>Nom <input type="text" name="nom" id="dm-nom" required autocomplete="off" /></label>
+          <fieldset>
+            <legend>Formation</legend>
+            <label class="radio"><input type="radio" name="ensemble" value="A" /> Formation A</label>
+            <label class="radio"><input type="radio" name="ensemble" value="B" /> Formation B</label>
+          </fieldset>
+          <label>Pupitre <select name="pupitre" id="dm-pupitre"></select></label>
+        </div>
+        <div class="dialogue__actions">
+          <button type="button" class="bouton bouton--danger" id="dm-retirer">Retirer de l’effectif</button>
+          <span class="outils__espace"></span>
+          <button type="button" class="bouton" value="annuler" id="dm-annuler">Annuler</button>
+          <button type="submit" class="bouton bouton--principal" value="ok">Valider</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialogue" id="dialogue-import" aria-labelledby="di-titre">
+      <form method="dialog" id="form-import">
+        <h2 id="di-titre">Ajouter plusieurs musiciens</h2>
+        <p class="dialogue__aide">Un musicien par ligne : « Prénom Nom » ou « Nom, Prénom ». Vous pouvez coller une liste depuis Excel ou un e-mail.</p>
+        <div class="champs champs--ligne">
+          <fieldset>
+            <legend>Formation</legend>
+            <label class="radio"><input type="radio" name="ensemble" value="A" checked /> A</label>
+            <label class="radio"><input type="radio" name="ensemble" value="B" /> B</label>
+          </fieldset>
+          <label>Pupitre <select name="pupitre" id="di-pupitre"></select></label>
+        </div>
+        <label class="bloc">Noms <textarea name="noms" id="di-noms" rows="8" placeholder="Léa Bapst&#10;Dupasquier, Lucas"></textarea></label>
+        <p class="dialogue__aide" id="di-apercu" aria-live="polite"></p>
+        <div class="dialogue__actions">
+          <span class="outils__espace"></span>
+          <button type="button" class="bouton" id="di-annuler">Annuler</button>
+          <button type="submit" class="bouton bouton--principal" value="ok">Ajouter</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="menu" id="menu" role="menu" hidden></div>
+
+    <script src="/admin/vendor/sortable.min.js" is:inline></script>
+    <script src="/admin/effectifs/effectifs.js" is:inline></script>
+  </body>
+</html>

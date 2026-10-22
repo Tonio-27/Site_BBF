@@ -29,20 +29,44 @@ Chaque fois que vous cliquez sur **Enregistrer**, le site est mis à jour automa
 5. **Enregistrer**. Pour préparer sans publier : cochez **Brouillon**.
 
 ### Ajouter un événement
+L'agenda s'ouvre sur les **événements à venir** (filtre « Passés » pour les archives), en tableau : date, titre, lieu, formation.
+
 1. **Agenda → Nouveau**.
 2. Titre, début (date et heure), lieu (ex. « 2M2C »), localité (ex. « Montreux »), formation(s), type.
 3. Facultatif : fin, description, lien de billetterie (affiche un bouton « Réserver »).
 4. Un concert passé part **tout seul** dans les archives le lendemain : ne le supprimez pas.
 5. Concert annulé ? Cochez **Annulé** plutôt que de supprimer.
 
-### Ajouter, modifier ou retirer un musicien
-1. **Musiciens** : la liste est groupée par formation et pupitre.
-2. **Nouveau** : prénom, nom, formation, pupitre. L'ordre d'affichage est automatique.
-3. Un musicien quitte le BBF : décochez **Actif** (sa fiche est conservée).
+### Gérer les musiciens : le tableau « Effectifs »
+
+Cliquez sur le bouton noir **⇄ Effectifs** en bas à gauche de l'éditeur. Chaque pupitre est une colonne ; les onglets en haut passent de la Formation A à la Formation B.
+
+| Je veux… | Je fais… |
+| --- | --- |
+| Changer quelqu'un de pupitre | Je le **glisse** dans l'autre pupitre. |
+| Changer l'ordre dans un pupitre | Je le glisse plus haut ou plus bas. |
+| Le passer dans l'autre formation | Je le glisse **sur l'onglet** « Formation B » (ou A), ou menu **⋯** → « Passer en Formation B ». |
+| Ajouter un musicien | Je tape « Prénom Nom » dans la case **＋ Ajouter** du pupitre, puis Entrée. La case reste prête pour le suivant. |
+| Ajouter toute une liste | **＋ Ajouter une liste** : je colle les noms (un par ligne, depuis Excel ou un e-mail), je choisis le pupitre. |
+| Corriger un nom | Double-clic sur le musicien (ou menu **⋯** → Modifier). |
+| Retirer quelqu'un qui quitte le BBF | Menu **⋯** → « Retirer de l'effectif ». Il va dans **Anciens musiciens** : rien n'est perdu. |
+| Faire revenir un ancien | **Anciens musiciens** → « Réintégrer », ou je le glisse dans un pupitre. |
+| Supprimer définitivement | **Anciens musiciens** → « Supprimer » (deux clics pour confirmer). |
+| Retrouver quelqu'un | Je tape son nom dans la recherche (touche **/**). |
+| Revenir en arrière | **↶ Annuler** (Ctrl+Z), autant de fois que nécessaire. |
+
+Rien n'est publié tant que vous n'avez pas cliqué sur **Enregistrer sur le site** (barre noire en bas, qui liste toutes vos modifications). Tout part en une seule fois et le site est à jour d'ici 3 minutes.
+
+Au clavier : Alt+↑/↓ monte ou descend, Alt+←/→ change de pupitre, Entrée modifie, Suppr retire, Ctrl+S enregistre.
+
+Dans l'éditeur, le menu **Musiciens** reste disponible pour une vue en tableau, des modifications en masse (bouton « Modifier » après avoir coché plusieurs lignes) ou la fiche détaillée.
 
 ### Créer un album photo
 1. **Photos → Nouveau** : titre, date, formation, photo de couverture (+ description).
 2. Dans **Photos**, ajoutez les images (plusieurs d'un coup possible). **60 au maximum** : l'album complet va sur le Drive du BBF, indiquez son lien dans « Lien vers l'album complet ».
+
+### Changer l'ordre des partenaires ou du comité
+Dans **Partenaires** ou **Comité**, cliquez sur **Réorganiser** puis glissez les lignes dans l'ordre voulu.
 
 ### Changer le logo d'un partenaire
 **Partenaires** → choisir le partenaire → remplacer le logo → Enregistrer. Pour retirer un partenaire : décocher **Actif**.

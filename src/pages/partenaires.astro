@@ -1,6 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
-import { Image } from 'astro:assets';
+import LogoPartenaire from '../components/LogoPartenaire.astro';
 import Base from '../layouts/Base.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import { partenairesActifs } from '../lib/contenu.ts';
@@ -20,9 +20,9 @@ const categories = CATEGORIES_PARTENAIRE.map((c) => ({ c, liste: partenaires.fil
           {liste.map((p) => (
             <li>
               {p.data.site_web ? (
-                <a href={p.data.site_web} rel="noopener"><Image src={p.data.logo} alt={p.data.nom} width={240} height={120} loading="lazy" /></a>
+                <a href={p.data.site_web} rel="noopener"><LogoPartenaire logo={p.data.logo} nom={p.data.nom} largeur={240} /></a>
               ) : (
-                <Image src={p.data.logo} alt={p.data.nom} width={240} height={120} loading="lazy" />
+                <LogoPartenaire logo={p.data.logo} nom={p.data.nom} largeur={240} />
               )}
             </li>
           ))}

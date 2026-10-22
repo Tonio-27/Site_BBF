@@ -47,6 +47,7 @@ jobs:
           npx serve@14.2.4 dist -l 4321 >/dev/null 2>&1 &
           sleep 3
           npm run check:a11y
+          npm run check:effectifs
       - name: Envoi chez Infomaniak
         env:
           HAS_KEY: ${{ secrets.INFOMANIAK_SSH_KEY != '' }}
