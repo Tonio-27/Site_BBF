@@ -1,6 +1,8 @@
 // Sveltia CMS additions for the BBF editors:
 // - article previews styled like the public site;
-// - a shortcut to the "Effectifs" board (drag-and-drop musicians).
+// - a shortcut to the "Effectifs" board (drag-and-drop musicians);
+// - the "Musiciens" menu opens that board instead of Sveltia's list
+//   (individual entries stay reachable for details such as a photo).
 (function () {
   'use strict';
   var base = document.currentScript.src;
@@ -28,6 +30,14 @@
     '.bbf-raccourci:hover{background:#e30613}.bbf-raccourci:hover span,.bbf-raccourci:hover small{color:#fff}' +
     '.bbf-raccourci:focus-visible{outline:3px solid #e30613;outline-offset:2px}';
   document.head.appendChild(style);
+  // replace(): the browser's Back button then returns to the previous editor
+  // page instead of bouncing on the redirect again.
+  var versEffectifs = function () {
+    if (/^#\/collections\/musiciens\/?(\?.*)?$/.test(location.hash)) location.replace(lien.href);
+  };
+  window.addEventListener('hashchange', versEffectifs);
+  versEffectifs();
+
   var poser = function () { document.body.appendChild(lien); };
   if (document.body) poser(); else document.addEventListener('DOMContentLoaded', poser);
 })();

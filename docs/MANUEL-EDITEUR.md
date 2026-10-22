@@ -39,7 +39,7 @@ L'agenda s'ouvre sur les **événements à venir** (filtre « Passés » pour le
 
 ### Gérer les musiciens : le tableau « Effectifs »
 
-Cliquez sur le bouton noir **⇄ Effectifs** en bas à gauche de l'éditeur. Chaque pupitre est une colonne ; les onglets en haut passent de la Formation A à la Formation B.
+Cliquez sur **Musiciens** dans le menu de l'éditeur (ou sur le bouton noir **⇄ Effectifs** en bas à gauche). Chaque pupitre est une colonne ; les onglets en haut passent de la Formation A à la Formation B.
 
 | Je veux… | Je fais… |
 | --- | --- |
@@ -59,7 +59,7 @@ Rien n'est publié tant que vous n'avez pas cliqué sur **Enregistrer sur le sit
 
 Au clavier : Alt+↑/↓ monte ou descend, Alt+←/→ change de pupitre, Entrée modifie, Suppr retire, Ctrl+S enregistre.
 
-Dans l'éditeur, le menu **Musiciens** reste disponible pour une vue en tableau, des modifications en masse (bouton « Modifier » après avoir coché plusieurs lignes) ou la fiche détaillée.
+Pour un détail propre à un musicien (sa photo, par exemple), sa fiche individuelle reste accessible depuis l'éditeur.
 
 ### Créer un album photo
 1. **Photos → Nouveau** : titre, date, formation, photo de couverture (+ description).

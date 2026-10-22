@@ -194,7 +194,7 @@ collections:
     label: Musiciens
     label_singular: Musicien
     icon: groups
-    description: "Pour déplacer, ajouter ou retirer des musiciens en quelques clics, utilisez le tableau « Effectifs » (bouton noir en bas à gauche). Ici : vue tableau, édition en masse et fiches détaillées."
+    description: "Ce menu ouvre le tableau « Effectifs » (glisser-déposer par pupitre). Les fiches individuelles restent accessibles pour les détails, par exemple la photo."
     editor: { preview: false }
     thumbnail: false
     table_columns: [prenom, nom, ensemble, pupitre, { field: actif, label: Actif }]

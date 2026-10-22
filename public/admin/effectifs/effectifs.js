@@ -631,6 +631,7 @@
       ['monter', 'Monter', 'Alt+↑', i === 0],
       ['descendre', 'Descendre', 'Alt+↓', i === groupe.length - 1],
       ['formation', 'Passer en Formation ' + autre],
+      ['fiche', 'Fiche complète (photo…)', null, !m.chemin],
       ['retirer', 'Retirer de l’effectif', 'Suppr'],
     ].forEach(function (a) {
       menu.appendChild(el('button', { type: 'button', role: 'menuitem', 'data-action': a[0], disabled: !!a[3], classe: a[0] === 'retirer' ? 'menu__danger' : '' }, [
@@ -660,6 +661,11 @@
       monter: function () { deplacerDansGroupe(m, -1); },
       descendre: function () { deplacerDansGroupe(m, 1); },
       formation: function () { changerFormation(m); },
+      // Detailed form in the CMS (only for musicians already saved).
+      fiche: function () {
+        var editeur = $('.barre__retour').getAttribute('href').split('#')[0];
+        location.assign(editeur + '#/collections/musiciens/entries/' + m.chemin.split('/').pop().replace(/\.json$/, ''));
+      },
       retirer: function () { retirer(m); },
     })[b.getAttribute('data-action')]();
   });
