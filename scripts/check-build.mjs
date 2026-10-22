@@ -2,6 +2,7 @@
 // nothing that would break the strict CSP, drafts never published.
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { patcherCms } from './update-cms.mjs';
 
 const DIST = 'dist';
 const erreurs = [];
@@ -11,7 +12,7 @@ const PAGES_CLES = [
   'blog/index.html', 'blog/rss.xml', 'presentation/index.html', 'gallery/index.html',
   'partenaires/index.html', 'presse/index.html', 'contact/index.html',
   'politique-de-confidentialite/index.html', 'conditions-generales/index.html',
-  'sitemap-index.xml', 'robots.txt', '.htaccess', 'admin/index.html', 'admin/config.yml', 'admin/sveltia-cms.js',
+  'sitemap-index.xml', 'robots.txt', '.htaccess', 'admin/index.html', 'admin/config.yml', 'admin/sveltia-cms.js', 'admin/locales/fr.json',
 ];
 for (const p of PAGES_CLES) if (!existsSync(join(DIST, p))) erreurs.push(`Page clé manquante : /${p}`);
 
@@ -65,7 +66,7 @@ for (const [d, pages] of descriptions) {
 
 // The committed Sveltia copy must match the pinned npm version (Renovate updates the latter).
 const cmsNpm = 'node_modules/@sveltia/cms/dist/sveltia-cms.js';
-if (existsSync(cmsNpm) && readFileSync(cmsNpm, 'utf8') !== readFileSync('public/admin/sveltia-cms.js', 'utf8')) {
+if (existsSync(cmsNpm) && patcherCms(readFileSync(cmsNpm, 'utf8')) !== readFileSync('public/admin/sveltia-cms.js', 'utf8')) {
   erreurs.push('public/admin/sveltia-cms.js ne correspond pas à la version épinglée : lancer « npm run cms:update »');
 }
 

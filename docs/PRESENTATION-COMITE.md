@@ -77,6 +77,10 @@ Environ **CHF 6–7 par mois** (hébergement Infomaniak). GitHub, Cloudflare et 
 | --- | --- | --- |
 | ![Événement](captures/evenement-ordinateur.jpg) | ![Présentation](captures/presentation-ordinateur.jpg) | ![Album](captures/album-ordinateur.jpg) |
 
+## Démo partageable
+
+`npm run demo` fabrique `dist-demo/` : une copie autonome du site (liens relatifs, aucun serveur nécessaire), avec une interface d'édition en **mode bac à sable** (« Travailler avec le dépôt de test ») : on peut tout essayer, rien n'est enregistré. Dans cette version, les boutons « Ajouter au calendrier » sont masqués et les vidéos s'ouvrent sur YouTube.
+
 ## Voir la bêta sur son ordinateur
 
 ```bash

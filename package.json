@@ -13,8 +13,9 @@
     "check:a11y": "node scripts/check-a11y.mjs",
     "test": "vitest run",
     "verify": "npm run check && npm test && npm run build && npm run check:build",
-    "cms:update": "node -e \"require('fs').copyFileSync('node_modules/@sveltia/cms/dist/sveltia-cms.js','public/admin/sveltia-cms.js')\"",
-    "demo:images": "node scripts/generate-demo-assets.mjs"
+    "cms:update": "node scripts/update-cms.mjs",
+    "demo:images": "node scripts/generate-demo-assets.mjs",
+    "demo": "astro build && node scripts/build-demo.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.4",
@@ -24,6 +25,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@fontsource-variable/material-symbols-outlined": "5.3.9",
+    "@fontsource-variable/source-sans-3": "5.3.1",
+    "@fontsource/noto-mono": "5.3.0",
     "@sveltia/cms": "0.250.2",
     "axe-core": "4.14.0",
     "html-validate": "11.17.0",
