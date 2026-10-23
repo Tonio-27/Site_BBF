@@ -39,7 +39,7 @@ L'agenda s'ouvre sur les **événements à venir** (filtre « Passés » pour le
 
 ### Gérer les musiciens : le tableau « Effectifs »
 
-Cliquez sur **Musiciens** dans le menu de l'éditeur (ou sur le bouton noir **⇄ Effectifs** en bas à gauche). Chaque pupitre est une colonne ; les onglets en haut passent de la Formation A à la Formation B.
+Cliquez sur **Musiciens** dans le menu de l'éditeur. Chaque pupitre est une colonne ; les onglets en haut passent de la Formation A à la Formation B.
 
 | Je veux… | Je fais… |
 | --- | --- |
