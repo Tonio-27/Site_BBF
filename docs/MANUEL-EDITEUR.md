@@ -4,18 +4,16 @@ Ce manuel explique comment modifier le site. Aucune connaissance technique n'est
 
 > Les captures d'écran seront ajoutées après la mise en place des comptes (phase 4).
 
-## 1. Une seule fois : créer votre accès
+## 1. Votre accès
 
-1. Vous recevez un e-mail « invitation to join brassbandfribourg ».
-2. Cliquez sur le lien et créez un compte gratuit sur **GitHub** (c'est le service qui conserve le contenu du site). Choisissez un mot de passe solide.
-3. Activez la **double authentification** quand elle vous est demandée (application sur téléphone). Gardez précieusement les codes de secours.
-4. Acceptez l'invitation. C'est tout : vous n'aurez plus jamais besoin d'aller sur ce site.
+Rien à créer : un administrateur ajoute votre adresse e-mail à la liste des rédacteurs. Pas de compte, pas de mot de passe.
 
 ## 2. Se connecter
 
 1. Ouvrez **brassbandfribourg.ch/admin**.
-2. Cliquez sur **« Se connecter avec GitHub »**, puis autorisez l'accès la première fois.
-3. Le menu de gauche affiche : Actualités, Agenda, Musiciens, Directeurs, Comité, Photos, Partenaires, Presse, Pages, Réglages.
+2. Cliquez sur **« Se connecter avec mon adresse e-mail »**.
+3. Saisissez votre adresse, puis recopiez le **code reçu par e-mail**. Vous restez connecté jusqu'à 12 heures.
+4. Le menu de gauche affiche : Actualités, Agenda, Musiciens, Directeurs, Comité, Photos, Partenaires, Presse, Pages, Réglages.
 
 Chaque fois que vous cliquez sur **Enregistrer**, le site est mis à jour automatiquement en **moins de 3 minutes**.
 

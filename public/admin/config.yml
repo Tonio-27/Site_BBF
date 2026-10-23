@@ -5,8 +5,12 @@ backend:
   name: github
   repo: brassbandfribourg/site-web
   branch: main
-  # Authentication Worker (sveltia-cms-auth on Cloudflare) — URL to set in phase 4.
+  # Relay Worker (workers/cms-auth on Cloudflare): editors sign in with an
+  # e-mail code, the Worker talks to GitHub with the single BBF account.
+  # Replace the host with the real workers.dev URL in phase 4.
   base_url: https://bbf-cms-auth.workers.dev
+  api_root: https://bbf-cms-auth.workers.dev/api/v3
+  graphql_api_root: https://bbf-cms-auth.workers.dev/api/graphql
   auth_methods: [oauth]
   commit_messages:
     create: "content: ajout {{collection}} « {{slug}} »"

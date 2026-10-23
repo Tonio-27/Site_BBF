@@ -18,7 +18,9 @@ const commits = [];
 const navigateur = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 const contexte = await navigateur.newContext({ viewport: { width: 1280, height: 860 } });
 await contexte.addInitScript(() => localStorage.setItem('sveltia-cms.user', JSON.stringify({ token: 'jeton-test' })));
-await contexte.route('https://api.github.com/graphql', async (route) => {
+const { load } = await import('js-yaml');
+const GRAPHQL = load(readFileSync('public/admin/config.yml', 'utf8')).backend.graphql_api_root;
+await contexte.route(GRAPHQL, async (route) => {
   const { query, variables } = route.request().postDataJSON();
   if (query.startsWith('mutation')) {
     commits.push(variables.i);

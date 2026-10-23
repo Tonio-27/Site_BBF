@@ -1,7 +1,7 @@
-# /admin is the Sveltia CMS editor: it talks to the GitHub API and the
-# authentication Worker, so it gets its own, wider CSP.
+# /admin is the Sveltia CMS editor: it talks to GitHub through the relay
+# Worker (workers/cms-auth), so it gets its own, wider CSP.
 <IfModule mod_headers.c>
   Header always set X-Robots-Tag "noindex, nofollow"
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.githubusercontent.com https://github.com; media-src 'self' blob: https://*.githubusercontent.com; connect-src 'self' blob: data: https://api.github.com https://*.githubusercontent.com https://bbf-cms-auth.workers.dev https://*.workers.dev; frame-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.githubusercontent.com https://github.com; media-src 'self' blob: https://*.githubusercontent.com; connect-src 'self' blob: data: https://*.githubusercontent.com https://*.workers.dev; frame-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
   Header set Cache-Control "no-cache"
 </IfModule>

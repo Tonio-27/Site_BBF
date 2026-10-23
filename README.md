@@ -28,7 +28,7 @@ npm run dev        # http://localhost:4321
 ## Architecture
 
 ```
-Éditeur → /admin (Sveltia) → commit sur main (GitHub) → Actions : build + tests → rsync SSH → Infomaniak
+Rédacteur → /admin (Sveltia) → code par e-mail (Cloudflare Access) → Worker bbf-cms-auth → commit sur main (compte GitHub unique du BBF) → Actions : build + tests → rsync SSH → Infomaniak
 ```
 
 - `src/content/` : **contenu édité par le CMS** (Markdown + JSON, un fichier par entrée).
@@ -42,6 +42,7 @@ npm run dev        # http://localhost:4321
 - `public/.htaccess` : HTTPS, en-têtes de sécurité (CSP stricte), cache, redirections 301.
 - `public/admin/` : Sveltia CMS (copie locale épinglée, traductions et polices locales) + `config.yml` (menus en français, validé contre le schéma JSON de Sveltia).
 - `src/pages/admin/effectifs.astro` + `public/admin/effectifs/` : tableau « Effectifs » (glisser-déposer des musiciens par pupitre). Il lit et écrit les mêmes fichiers `src/content/musiciens/*.json` que Sveltia, via l'API GitHub (session Sveltia, un seul commit par enregistrement, refus si un fichier a changé entre-temps). En démo, il partage le bac à sable de Sveltia (stockage privé du navigateur).
+- `workers/cms-auth/` : Worker Cloudflare de connexion. Les rédacteurs se connectent par e-mail (Cloudflare Access), le Worker relaie les appels à GitHub avec le jeton du compte unique du BBF (jamais transmis au navigateur) et signe chaque commit de l'adresse du rédacteur. Mise en place : `docs/RUNBOOK.md` (Admin).
 
 ### Règles
 

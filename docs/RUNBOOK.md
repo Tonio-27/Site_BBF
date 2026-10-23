@@ -30,11 +30,40 @@ ssh-keygen -t ed25519 -N '' -C 'deploy@brassbandfribourg.ch' -f bbf-deploy
 
 Pendant la recette, protéger `nouveau.brassbandfribourg.ch` par mot de passe depuis le Manager Infomaniak (protection de dossier).
 
-### Admin (phase 4)
+### Admin (phase 4) — un seul compte GitHub, connexion par e-mail
 
-1. Organisation GitHub → Settings → Developer settings → **OAuth Apps → New** : callback `https://<worker>.workers.dev/callback`.
-2. Déployer `sveltia/sveltia-cms-auth` (version épinglée) sur Cloudflare Workers, variables : `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (chiffré), `ALLOWED_DOMAINS=brassbandfribourg.ch, nouveau.brassbandfribourg.ch`.
-3. Reporter l'URL du Worker dans `public/admin/config.yml` (`base_url`) et dans `public/admin/.htaccess` (CSP `connect-src`).
+Principe : le BBF a **un seul compte GitHub** (`it@brassbandfribourg.ch`). Les rédacteurs n'en ont pas : ils se connectent à `/admin` avec leur adresse e-mail (code à usage unique envoyé par Cloudflare Access). Le Worker `workers/cms-auth` garde le jeton GitHub du BBF, relaie les appels du CMS et du tableau Effectifs, et ajoute « Modifié par : <e-mail> » à chaque enregistrement.
+
+```
+Rédacteur → /admin → « Se connecter avec mon adresse e-mail »
+         → Cloudflare Access (code par e-mail) → Worker bbf-cms-auth (session 12 h)
+         → API GitHub avec le jeton du BBF → commit « … Modifié par : x@… »
+```
+
+**GitHub (une fois)**
+1. Créer le compte `brassbandfribourg` avec `it@brassbandfribourg.ch`, double authentification activée, codes de secours dans le Drive « Site web — accès ».
+2. Y placer le dépôt privé `site-web`.
+3. Dépôt → Settings → **Rules → Rulesets → New branch ruleset** sur `main` : bloquer *force push* et *deletion*, sans exception.
+4. Settings du compte → Developer settings → **Fine-grained tokens → Generate** : dépôt `site-web` uniquement ; permissions *Contents : Read and write*, *Actions : Read-only* (le reste à *No access*) ; échéance la plus longue proposée, rappel dans l'agenda du comité.
+
+**Cloudflare Access (une fois, plan Zero Trust gratuit)**
+1. Zero Trust → nom d'équipe `brassbandfribourg` (domaine `brassbandfribourg.cloudflareaccess.com`). Méthode de connexion : **One-time PIN**.
+2. Access → Applications → **Add → Self-hosted** : domaine du Worker (`bbf-cms-auth.<sous-domaine>.workers.dev`), chemin `auth`, durée de session 24 h.
+3. Politique **Rédacteurs** : *Allow*, *Include → Emails* : la liste des adresses (de préférence les adresses de fonction : `ensemble-a@…`, `presse@…`).
+4. Copier l'**Application Audience (AUD) tag** dans `workers/cms-auth/wrangler.toml` (`ACCESS_AUD`).
+
+**Worker**
+```bash
+npx wrangler login                                            # compte Cloudflare du BBF
+openssl rand -base64 48 | npx wrangler secret put SESSION_SECRET --config workers/cms-auth/wrangler.toml
+npx wrangler secret put GITHUB_TOKEN --config workers/cms-auth/wrangler.toml   # coller le jeton fine-grained
+npx wrangler deploy --config workers/cms-auth/wrangler.toml
+```
+Reporter l'URL du Worker dans `public/admin/config.yml` (`base_url`, `api_root`, `graphql_api_root`). Tests du Worker : `npx vitest run tests/cms-auth.test.ts`.
+
+### Ajouter ou retirer un rédacteur (2 min)
+
+Zero Trust → Access → Applications → `bbf-cms-auth` → politique **Rédacteurs** → ajouter ou supprimer l'adresse. Une session déjà ouverte expire au plus tard après 12 h ; pour couper tout le monde immédiatement, changer `SESSION_SECRET` (commande ci-dessus).
 
 ## Restaurer un fichier supprimé (5 min)
 
@@ -69,7 +98,11 @@ Test de restauration **une fois par an** : restaurer la dernière archive dans u
 
 ## Worker Cloudflare en panne (1 h)
 
-Le site public n'est pas touché. Redéployer le Worker ; en attendant, un administrateur peut se connecter à `/admin` avec un jeton personnel GitHub (ajouter temporairement `token` à `auth_methods`).
+Le site public n'est pas touché. Redéployer le Worker (`npx wrangler deploy --config workers/cms-auth/wrangler.toml`). En attendant, un administrateur peut modifier le contenu directement sur github.com avec le compte du BBF.
+
+## Jeton GitHub échu ou divulgué (10 min)
+
+Générer un nouveau jeton fine-grained (mêmes réglages), `npx wrangler secret put GITHUB_TOKEN --config workers/cms-auth/wrangler.toml`, puis supprimer l'ancien jeton sur GitHub.
 
 ## Infomaniak indisponible (1 h)
 
@@ -94,7 +127,8 @@ Le rapport est écrit dans `migration/RAPPORT.md`, les redirections 301 sont inj
 
 ## Revue annuelle
 
-- [ ] Liste des éditeurs et administrateurs (après l'AG).
+- [ ] Liste des rédacteurs (politique Cloudflare Access) et des administrateurs (après l'AG).
+- [ ] Échéance du jeton GitHub du Worker.
 - [ ] Test de restauration.
 - [ ] Nouvelle clé SSH de déploiement (et suppression de l'ancienne).
 - [ ] Versions de Sveltia CMS (`npm run cms:update`) et du Worker.

@@ -1,7 +1,8 @@
 // Effectifs — drag-and-drop editor for the musicians of both formations.
 // Data model: one JSON file per musician in src/content/musiciens (unchanged
 // from the CMS), so this board and Sveltia CMS always edit the same files.
-// Storage: GitHub (production, uses the Sveltia session token) or the
+// Storage: GitHub through the relay Worker (production, uses the Sveltia
+// session token) or the
 // browser's private file system shared with Sveltia's test repository (demo).
 (function () {
   'use strict';
@@ -51,7 +52,7 @@
       try { return (JSON.parse(localStorage.getItem('sveltia-cms.user')) || {}).token; } catch (e) { return null; }
     },
     graphql: function (requete, variables) {
-      return fetch('https://api.github.com/graphql', {
+      return fetch(D.graphql, {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + this.jeton(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: requete, variables: variables }),

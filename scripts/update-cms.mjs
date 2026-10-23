@@ -32,10 +32,28 @@ export function patcherCms(source) {
   return js;
 }
 
+// Editors sign in with an e-mail code (workers/cms-auth), never with a GitHub
+// account: the sign-in button must not say "GitHub".
+export const BOUTON_CONNEXION = {
+  'fr.json': 'Se connecter avec mon adresse e-mail',
+  'de.json': 'Mit meiner E-Mail-Adresse anmelden',
+  'en-US.json': 'Sign in with my email address',
+};
+
+/** Returns the locale file with the sign-in button relabelled. */
+export function patcherTraduction(source, fichier) {
+  const textes = JSON.parse(source);
+  if (!('sign_in_with_x' in textes)) throw new Error(`Clé sign_in_with_x absente de ${fichier} : adapter scripts/update-cms.mjs`);
+  textes.sign_in_with_x = BOUTON_CONNEXION[fichier];
+  return JSON.stringify(textes);
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   writeFileSync(`${ADMIN}/sveltia-cms.js`, patcherCms(readFileSync(`${CMS}/dist/sveltia-cms.js`, 'utf8')));
   mkdirSync(`${ADMIN}/locales`, { recursive: true });
-  for (const f of readdirSync(`${CMS}/locales`)) if (['fr.json', 'de.json', 'en-US.json'].includes(f)) copyFileSync(`${CMS}/locales/${f}`, `${ADMIN}/locales/${f}`);
+  for (const f of readdirSync(`${CMS}/locales`)) {
+    if (BOUTON_CONNEXION[f]) writeFileSync(`${ADMIN}/locales/${f}`, patcherTraduction(readFileSync(`${CMS}/locales/${f}`, 'utf8'), f));
+  }
   mkdirSync(`${ADMIN}/fonts`, { recursive: true });
   for (const [, npm, local] of POLICES) copyFileSync(`node_modules/${npm}`, `${ADMIN}/fonts/${local}`);
   // Drag-and-drop library for the "Effectifs" board.

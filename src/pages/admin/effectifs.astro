@@ -1,17 +1,20 @@
 ---
 // "Effectifs" board: drag-and-drop editor for musicians, next to Sveltia CMS.
 // Static page; all logic runs in the browser (public/admin/effectifs/effectifs.js)
-// and saves through the GitHub API with the editor's Sveltia session.
+// and saves through the relay Worker (or GitHub) with the editor's Sveltia session.
 import { readFileSync, readdirSync } from 'node:fs';
 import { load } from 'js-yaml';
 import { PUPITRES } from '../../lib/pupitres.ts';
 
 const DOSSIER = 'src/content/musiciens';
-const config = load(readFileSync('public/admin/config.yml', 'utf8')) as { backend: { name: string; repo?: string; branch?: string } };
+const config = load(readFileSync('public/admin/config.yml', 'utf8')) as {
+  backend: { name: string; repo?: string; branch?: string; graphql_api_root?: string };
+};
 const donnees = {
   mode: config.backend.name === 'github' ? 'github' : 'demo',
   depot: config.backend.repo ?? '',
   branche: config.backend.branch ?? 'main',
+  graphql: config.backend.graphql_api_root ?? 'https://api.github.com/graphql',
   dossier: DOSSIER,
   pupitres: PUPITRES,
   // Snapshot used only when no live storage is available (offline demo).

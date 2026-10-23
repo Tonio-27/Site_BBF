@@ -1,0 +1,13 @@
+# Deploy: npx wrangler deploy --config workers/cms-auth/wrangler.toml
+# Secrets (once): npx wrangler secret put GITHUB_TOKEN / SESSION_SECRET
+# See docs/RUNBOOK.md, "Admin".
+name = "bbf-cms-auth"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://brassbandfribourg.ch, https://nouveau.brassbandfribourg.ch"
+ACCESS_TEAM_DOMAIN = "brassbandfribourg.cloudflareaccess.com"
+ACCESS_AUD = "à-remplacer-par-le-tag-audience-de-l-application-access"
+SESSION_HOURS = "12"
