@@ -6,7 +6,9 @@ Ce manuel explique comment modifier le site. Aucune connaissance technique n'est
 
 ## 1. Votre accès
 
-Rien à créer : un administrateur ajoute votre adresse e-mail à la liste des rédacteurs. Pas de compte, pas de mot de passe.
+Rien à créer : un administrateur ajoute votre adresse e-mail dans **Réglages → Accès à l'édition**. Pas de compte, pas de mot de passe.
+
+> **Administrateurs** : c'est aussi là que vous ajoutez ou retirez quelqu'un. Un rédacteur peut consulter cette liste mais pas l'enregistrer.
 
 ## 2. Se connecter
 

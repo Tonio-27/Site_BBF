@@ -173,6 +173,20 @@ export const schemas = {
       annonce_lien: z.string().optional(),
       annonce_fin: dateLocale.optional(),
     }),
+
+  // Who may sign in to /admin (read by workers/cms-auth, never published).
+  acces: () =>
+    z.object({
+      personnes: z
+        .array(
+          z.object({
+            email: z.email(),
+            nom: texteRequis,
+            role: z.enum(['redacteur', 'administrateur']),
+          }),
+        )
+        .min(1),
+    }),
 };
 
 export type NomSchema = keyof typeof schemas;

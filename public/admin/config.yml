@@ -482,8 +482,30 @@ collections:
     label: Réglages
     icon: settings
     editor: { preview: false }
-    description: Coordonnées, réseaux sociaux, référencement et bandeau d'annonce.
+    description: Coordonnées, réseaux sociaux, référencement, bandeau d'annonce et accès à l'édition.
     files:
+      - name: acces
+        label: Accès à l'édition
+        icon: lock
+        file: acces/redacteurs.json
+        fields:
+          - name: personnes
+            label: Personnes autorisées
+            hint: "Les personnes qui peuvent se connecter à cette interface avec leur adresse e-mail. Seuls les administrateurs peuvent enregistrer cette liste ; un retrait prend effet en une minute."
+            label_singular: personne
+            widget: list
+            summary: "{{fields.nom}} — {{fields.email}} ({{fields.role}})"
+            collapsed: true
+            fields:
+              - { name: email, label: Adresse e-mail, widget: string, type: email, hint: "De préférence une adresse de fonction (ex. presse@brassbandfribourg.ch) : l'accès suit la fonction." }
+              - { name: nom, label: Nom ou fonction, widget: string }
+              - name: role
+                label: Rôle
+                widget: select
+                default: redacteur
+                options:
+                  - { label: "Rédacteur — modifie le contenu", value: redacteur }
+                  - { label: "Administrateur — gère aussi cette liste", value: administrateur }
       - name: reglages
         label: Réglages du site
         file: src/content/pages/reglages.json

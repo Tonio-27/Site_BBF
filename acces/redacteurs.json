@@ -1,0 +1,9 @@
+{
+  "personnes": [
+    { "email": "president@brassbandfribourg.ch", "nom": "Président", "role": "administrateur" },
+    { "email": "it@brassbandfribourg.ch", "nom": "Responsable informatique", "role": "administrateur" },
+    { "email": "ensemble-a@brassbandfribourg.ch", "nom": "Formation A", "role": "redacteur" },
+    { "email": "ensemble-b@brassbandfribourg.ch", "nom": "Formation B", "role": "redacteur" },
+    { "email": "presse@brassbandfribourg.ch", "nom": "Presse", "role": "redacteur" }
+  ]
+}

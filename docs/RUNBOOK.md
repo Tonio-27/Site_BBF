@@ -34,6 +34,8 @@ Pendant la recette, protéger `nouveau.brassbandfribourg.ch` par mot de passe de
 
 Principe : le BBF a **un seul compte GitHub** (`it@brassbandfribourg.ch`). Les rédacteurs n'en ont pas : ils se connectent à `/admin` avec leur adresse e-mail (code à usage unique envoyé par Cloudflare Access). Le Worker `workers/cms-auth` garde le jeton GitHub du BBF, relaie les appels du CMS et du tableau Effectifs, et ajoute « Modifié par : <e-mail> » à chaque enregistrement.
 
+La liste des personnes autorisées est le fichier `acces/redacteurs.json`, modifié **dans l'interface d'édition** (Réglages → Accès à l'édition). Le Worker la relit chaque minute et applique les rôles : un **rédacteur** n'enregistre que du contenu (`src/content/`, `src/assets/uploads/`, `public/documents/`) ; seul un **administrateur** peut modifier la liste ou le reste du dépôt. `RESCUE_ADMINS` (dans `wrangler.toml`) reste administrateur même si la liste est cassée ou vidée.
+
 ```
 Rédacteur → /admin → « Se connecter avec mon adresse e-mail »
          → Cloudflare Access (code par e-mail) → Worker bbf-cms-auth (session 12 h)
@@ -49,7 +51,7 @@ Rédacteur → /admin → « Se connecter avec mon adresse e-mail »
 **Cloudflare Access (une fois, plan Zero Trust gratuit)**
 1. Zero Trust → nom d'équipe `brassbandfribourg` (domaine `brassbandfribourg.cloudflareaccess.com`). Méthode de connexion : **One-time PIN**.
 2. Access → Applications → **Add → Self-hosted** : domaine du Worker (`bbf-cms-auth.<sous-domaine>.workers.dev`), chemin `auth`, durée de session 24 h.
-3. Politique **Rédacteurs** : *Allow*, *Include → Emails* : la liste des adresses (de préférence les adresses de fonction : `ensemble-a@…`, `presse@…`).
+3. Politique **Code par e-mail** : *Allow*, *Include → Everyone*. Access ne fait qu'envoyer le code ; c'est la liste de l'interface d'édition qui décide qui entre.
 4. Copier l'**Application Audience (AUD) tag** dans `workers/cms-auth/wrangler.toml` (`ACCESS_AUD`).
 
 **Worker**
@@ -61,9 +63,9 @@ npx wrangler deploy --config workers/cms-auth/wrangler.toml
 ```
 Reporter l'URL du Worker dans `public/admin/config.yml` (`base_url`, `api_root`, `graphql_api_root`). Tests du Worker : `npx vitest run tests/cms-auth.test.ts`.
 
-### Ajouter ou retirer un rédacteur (2 min)
+### Ajouter ou retirer un rédacteur (1 min)
 
-Zero Trust → Access → Applications → `bbf-cms-auth` → politique **Rédacteurs** → ajouter ou supprimer l'adresse. Une session déjà ouverte expire au plus tard après 12 h ; pour couper tout le monde immédiatement, changer `SESSION_SECRET` (commande ci-dessus).
+Un administrateur : `/admin` → **Réglages → Accès à l'édition** → ajouter ou supprimer la ligne → **Enregistrer**. Un retrait coupe aussi une session ouverte, en une minute. Pour couper tout le monde immédiatement, changer `SESSION_SECRET` (commande ci-dessus).
 
 ## Restaurer un fichier supprimé (5 min)
 
@@ -127,7 +129,7 @@ Le rapport est écrit dans `migration/RAPPORT.md`, les redirections 301 sont inj
 
 ## Revue annuelle
 
-- [ ] Liste des rédacteurs (politique Cloudflare Access) et des administrateurs (après l'AG).
+- [ ] Liste « Accès à l'édition » (rédacteurs et administrateurs) après l'AG.
 - [ ] Échéance du jeton GitHub du Worker.
 - [ ] Test de restauration.
 - [ ] Nouvelle clé SSH de déploiement (et suppression de l'ancienne).

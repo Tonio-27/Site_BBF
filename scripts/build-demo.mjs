@@ -94,7 +94,7 @@ writeFileSync(
 // Seed for the sandbox: the repository files Sveltia would see on GitHub.
 const SEED = join(OUT, 'admin/seed');
 const graines = [];
-for (const dossier of ['src/content', 'src/assets/uploads', 'public/documents']) {
+for (const dossier of ['src/content', 'src/assets/uploads', 'public/documents', 'acces']) {
   for (const f of fichiers(dossier)) {
     const chemin = f.split('\\').join('/');
     mkdirSync(join(SEED, posix.dirname(chemin)), { recursive: true });

@@ -7,7 +7,7 @@ Document de référence pour le comité. **Aucun mot de passe ici.** Les codes d
 | Service | Compte | Administrateurs | Double authentification | Renouvellement / coût |
 | --- | --- | --- | --- | --- |
 | GitHub | **Compte unique** `brassbandfribourg`, dépôt privé `site-web` | _à désigner (2–3)_, seuls à connaître l'accès | Obligatoire | Gratuit |
-| Cloudflare | Compte BBF : Worker `bbf-cms-auth` + Access (connexion des rédacteurs par e-mail) | _à désigner (2)_ | Obligatoire | Gratuit |
+| Cloudflare | Compte BBF : Worker `bbf-cms-auth` + Access (envoi du code de connexion par e-mail) | _à désigner (2)_ | Obligatoire | Gratuit |
 | Infomaniak | Compte BBF : domaine, e-mails, Hébergement Web | _à désigner (2)_ | Obligatoire | ≈ CHF 6–7/mois + domaine (date : _à compléter_) |
 | Google Drive partagé | Dossier « Site web — sauvegardes » | _à désigner_ | — | — |
 
@@ -15,22 +15,22 @@ Document de référence pour le comité. **Aucun mot de passe ici.** Les codes d
 
 | Rôle | Droits | Qui |
 | --- | --- | --- |
-| Administrateur | Accès aux comptes GitHub, Cloudflare et Infomaniak du BBF : gère les accès | _à compléter_ |
-| Rédacteur | Son adresse e-mail dans la politique Access **Rédacteurs** : modifie le contenu via /admin, **sans compte GitHub** | _à compléter_ |
+| Administrateur | Rôle « Administrateur » dans **Réglages → Accès à l'édition** : contenu + liste des accès ; certains ont aussi les comptes GitHub, Cloudflare, Infomaniak du BBF | _à compléter_ |
+| Rédacteur | Rôle « Rédacteur » dans **Réglages → Accès à l'édition** : modifie le contenu via /admin, **sans compte GitHub** | _à compléter_ |
 | Développeur | Fait évoluer le code ; accès temporaire au dépôt, retiré en fin de mission | — |
 
 ## Ajouter un rédacteur
 
-1. dash.cloudflare.com → **Zero Trust → Access → Applications → bbf-cms-auth → politique Rédacteurs** → ajouter son adresse e-mail.
+1. Un administrateur : `/admin` → **Réglages → Accès à l'édition** → **Ajouter** → adresse, nom ou fonction, rôle → **Enregistrer**.
 2. Lui envoyer `docs/MANUEL-EDITEUR.md`.
 
 ## Retirer un rédacteur ou un administrateur
 
-Retirer son adresse de la politique **Rédacteurs** (et ses accès Cloudflare / Infomaniak / GitHub s'il était administrateur). Ses modifications restent dans l'historique, signées de son adresse.
+Supprimer sa ligne dans **Réglages → Accès à l'édition** : l'accès est coupé en une minute (et retirer ses accès Cloudflare / Infomaniak / GitHub s'il en avait). Ses modifications restent dans l'historique, signées de son adresse.
 
 ## À chaque assemblée générale
 
-- [ ] Retirer les personnes qui ont quitté le comité (politique Rédacteurs, Cloudflare, Infomaniak, GitHub).
+- [ ] Retirer les personnes qui ont quitté le comité (Réglages → Accès à l'édition, puis Cloudflare, Infomaniak, GitHub).
 - [ ] Vérifier qu'il reste au moins 2 administrateurs par service.
 - [ ] Mettre à jour ce document (noms ci-dessus).
 - [ ] Vérifier la liste des adresses de fonction chez Infomaniak (redirections vers les bonnes personnes).

@@ -39,6 +39,7 @@ const correspondances = {
   'pages/confidentialite': 'legal',
   'pages/conditions': 'legal',
   'reglages/reglages': 'reglages',
+  'reglages/acces': 'acces',
 };
 
 const erreurs = [];

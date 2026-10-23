@@ -1,5 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import worker, { creerSession, lireSession } from '../workers/cms-auth/index.js';
+import { readFileSync } from 'node:fs';
+import worker, { creerSession, lireSession, viderCache } from '../workers/cms-auth/index.js';
+import { schemas } from '../src/lib/schemas.ts';
 
 const env = {
   GITHUB_TOKEN: 'ghp_bbf',
@@ -7,6 +9,19 @@ const env = {
   ACCESS_TEAM_DOMAIN: 'bbf.cloudflareaccess.com',
   ACCESS_AUD: 'aud-bbf',
   ALLOWED_ORIGINS: 'https://brassbandfribourg.ch',
+  REPO: 'brassbandfribourg/site-web',
+  BRANCH: 'main',
+  ACCESS_FILE: 'acces/redacteurs.json',
+  EDITOR_PATHS: 'src/content/, src/assets/uploads/, public/documents/',
+  RESCUE_ADMINS: 'secours@brassbandfribourg.ch',
+};
+// The access list as stored in the repository (edited in the CMS).
+let listeAcces = {
+  personnes: [
+    { email: 'it@brassbandfribourg.ch', nom: 'IT', role: 'administrateur' },
+    { email: 'ensemble-a@brassbandfribourg.ch', nom: 'Formation A', role: 'redacteur' },
+    { email: 'presse@brassbandfribourg.ch', nom: 'Presse', role: 'redacteur' },
+  ],
 };
 const W = 'https://bbf-cms-auth.example.workers.dev';
 const b64url = (b: ArrayBuffer | Uint8Array) => Buffer.from(b as ArrayBuffer).toString('base64url');
@@ -32,12 +47,13 @@ beforeAll(async () => {
   jwk = { ...(await crypto.subtle.exportKey('jwk', cles.publicKey)), kid: 'k1' } as JsonWebKey;
   vi.stubGlobal('fetch', async (url: string, init: RequestInit = {}) => {
     if (url.endsWith('/cdn-cgi/access/certs')) return Response.json({ keys: [jwk] });
+    if (url.includes('/contents/acces/redacteurs.json')) return Response.json(listeAcces);
     appels.push({ url, init });
     if (url === 'https://api.github.com/user') return Response.json({ login: 'bbf-site', name: 'BBF', id: 1 });
     return Response.json({ data: { ok: true } });
   });
 });
-afterEach(() => { appels.length = 0; });
+afterEach(() => { appels.length = 0; viderCache(); });
 
 const popupMessage = async (r: Response) => /const message = (".*?");/.exec(await r.text())![1];
 
@@ -111,5 +127,59 @@ describe('relais GitHub', () => {
   it('n’ouvre pas le CORS aux autres sites', async () => {
     const r = await worker.fetch(new Request(`${W}/api/graphql`, { method: 'OPTIONS', headers: { Origin: 'https://exemple.com' } }), env);
     expect(r.headers.get('Access-Control-Allow-Origin')).toBeNull();
+  });
+});
+
+describe('liste des accès (Réglages → Accès à l’édition)', () => {
+  const auth = async (email: string) =>
+    popupMessage(await worker.fetch(new Request(`${W}/auth`, { headers: { 'Cf-Access-Jwt-Assertion': await jwt({ ...valide(), email }) } }), env));
+  const commit = async (email: string, chemins: string[], query = 'mutation($i:CreateCommitOnBranchInput!){createCommitOnBranch(input:$i){commit{oid}}}') => {
+    const s = await creerSession(email, env);
+    const corps = { query, variables: { i: { message: { headline: 'x' }, fileChanges: { additions: chemins.map((path) => ({ path, contents: '' })) } } } };
+    const r = await worker.fetch(new Request(`${W}/api/graphql`, { method: 'POST', body: JSON.stringify(corps), headers: { Authorization: `Bearer ${s}` } }), env);
+    return (await r.json()) as { errors?: { message: string }[] };
+  };
+
+  it('le fichier du dépôt respecte le schéma', () => {
+    expect(schemas.acces().safeParse(JSON.parse(readFileSync('acces/redacteurs.json', 'utf8'))).success).toBe(true);
+  });
+
+  it('refuse une adresse absente de la liste, accepte l’administrateur de secours', async () => {
+    expect(await auth('inconnu@exemple.ch')).toContain('authorization:github:error:');
+    expect(await auth('secours@brassbandfribourg.ch')).toContain('authorization:github:success:');
+  });
+
+  it('coupe une session ouverte dès que la personne est retirée', async () => {
+    const s = await creerSession('presse@brassbandfribourg.ch', env);
+    const appel = () => worker.fetch(new Request(`${W}/api/v3/user`, { headers: { Authorization: `token ${s}` } }), env);
+    expect((await appel()).status).toBe(200);
+    const avant = listeAcces;
+    listeAcces = { personnes: avant.personnes.filter((p) => p.email !== 'presse@brassbandfribourg.ch') };
+    viderCache();
+    expect((await appel()).status).toBe(401);
+    listeAcces = avant;
+  });
+
+  it('un rédacteur modifie le contenu, pas la liste ni le code du site', async () => {
+    expect((await commit('presse@brassbandfribourg.ch', ['src/content/articles/a.md', 'src/assets/uploads/p.webp'])).errors).toBeUndefined();
+    expect((await commit('presse@brassbandfribourg.ch', ['acces/redacteurs.json'])).errors?.[0].message).toMatch(/liste des accès/);
+    expect((await commit('presse@brassbandfribourg.ch', ['src/pages/index.astro'])).errors?.[0].message).toMatch(/administrateurs/);
+    expect((await commit('presse@brassbandfribourg.ch', ['src/content/../pages/x.astro'])).errors).toBeDefined();
+  });
+
+  it('un rédacteur ne peut pas déguiser une autre opération', async () => {
+    const autres = [
+      'mutation{updateRef(input:{refId:"x",oid:"y",force:true}){clientMutationId}}',
+      '# commentaire\nmutation{deleteRef(input:{refId:"x"}){clientMutationId}}',
+      'mutation($i:CreateCommitOnBranchInput!){a:createCommitOnBranch(input:$i){commit{oid}} b:mergeBranch(input:{}){clientMutationId}}',
+    ];
+    for (const q of autres) expect((await commit('presse@brassbandfribourg.ch', [], q)).errors?.[0].message).toMatch(/administrateurs/);
+    const s = await creerSession('presse@brassbandfribourg.ch', env);
+    const r = await worker.fetch(new Request(`${W}/api/v3/repos/brassbandfribourg/site-web/git/refs/heads/main`, { method: 'PATCH', body: '{}', headers: { Authorization: `token ${s}` } }), env);
+    expect(r.status).toBe(403);
+  });
+
+  it('un administrateur peut modifier la liste', async () => {
+    expect((await commit('it@brassbandfribourg.ch', ['acces/redacteurs.json'])).errors).toBeUndefined();
   });
 });

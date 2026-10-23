@@ -4,15 +4,21 @@
 // sign in with their e-mail address (Cloudflare Access sends a one-time code),
 // then this Worker
 //   1. /auth        — hands Sveltia CMS a short-lived session for that e-mail
-//                     (same popup protocol as sveltia-cms-auth);
-//   2. /api/v3/*    — relays GitHub REST calls with the BBF token, which never
+//                     (same popup protocol as sveltia-cms-auth), if the e-mail
+//                     is in the access list (acces/redacteurs.json, edited in
+//                     the CMS under Réglages → Accès à l'édition);
+//   2. /api/v3/*    — relays GitHub calls with the BBF token, which never
 //      /api/graphql   leaves the Worker; every commit gets "Modifié par : <e-mail>".
+//                     Editors may only commit content files and read; admins
+//                     may do anything the token allows (including the list).
 // Anything else redirects to github.com (the CMS's "view on GitHub" links).
 //
 // Secrets: GITHUB_TOKEN (fine-grained token of the BBF account, this
 // repository only), SESSION_SECRET (random, 32+ characters).
 // Variables: ACCESS_TEAM_DOMAIN (e.g. bbf.cloudflareaccess.com), ACCESS_AUD
-// (Application Audience tag), ALLOWED_ORIGINS (comma-separated), SESSION_HOURS.
+// (Application Audience tag), ALLOWED_ORIGINS (comma-separated), SESSION_HOURS,
+// REPO, BRANCH, ACCESS_FILE, EDITOR_PATHS (comma-separated path prefixes),
+// RESCUE_ADMINS (comma-separated e-mails that stay admins if the list breaks).
 
 const GITHUB_API = 'https://api.github.com';
 const enc = new TextEncoder();
@@ -36,6 +42,37 @@ function cors(request, env) {
     Vary: 'Origin',
   };
 }
+
+// ------------------------------------------------------------------ access list
+const liste = (v) => (v ?? '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+let acces = { lu: 0, personnes: null };
+
+// The list in the repository, cached one minute (a removal takes effect within a minute).
+async function personnes(env) {
+  if (acces.personnes && Date.now() - acces.lu < 60_000) return acces.personnes;
+  try {
+    const r = await fetch(`${GITHUB_API}/repos/${env.REPO}/contents/${env.ACCESS_FILE}?ref=${encodeURIComponent(env.BRANCH ?? 'main')}`, {
+      headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: 'application/vnd.github.raw+json', 'User-Agent': 'bbf-cms-auth' },
+    });
+    if (!r.ok) throw new Error(`liste ${r.status}`);
+    const lues = (await r.json()).personnes;
+    if (!Array.isArray(lues)) throw new Error('liste invalide');
+    acces = { lu: Date.now(), personnes: lues };
+  } catch {
+    acces = { lu: Date.now(), personnes: [] }; // unreadable list: only rescue admins get in
+  }
+  return acces.personnes;
+}
+
+export async function roleDe(email, env) {
+  const e = (email ?? '').toLowerCase();
+  if (!e) return null;
+  if (liste(env.RESCUE_ADMINS).includes(e)) return 'administrateur';
+  const p = (await personnes(env)).find((x) => (x.email ?? '').toLowerCase() === e);
+  return p && ['redacteur', 'administrateur'].includes(p.role) ? p.role : null;
+}
+
+export const viderCache = () => { acces = { lu: 0, personnes: null }; };
 
 // ------------------------------------------------------------------ sessions
 const hmacKey = (secret) => crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
@@ -112,7 +149,9 @@ function popup(env, message) {
 
 async function auth(request, env) {
   const email = await emailAccess(request, env);
-  if (!email) return popup(env, `authorization:github:error:${JSON.stringify({ message: 'Accès refusé : adresse non autorisée.' })}`);
+  if (!email || !(await roleDe(email, env))) {
+    return popup(env, `authorization:github:error:${JSON.stringify({ message: 'Accès refusé : demandez à un administrateur d’ajouter votre adresse.' })}`);
+  }
   const token = await creerSession(email, env);
   return popup(env, `authorization:github:success:${JSON.stringify({ provider: 'github', token })}`);
 }
@@ -129,6 +168,36 @@ function signer(valeur, email) {
   Object.values(valeur).forEach((v) => signer(v, email));
 }
 
+// Paths of every file a GraphQL commit adds or deletes.
+function cheminsModifies(valeur, chemins = []) {
+  if (Array.isArray(valeur)) valeur.forEach((v) => cheminsModifies(v, chemins));
+  else if (valeur && typeof valeur === 'object') {
+    if (valeur.fileChanges) {
+      for (const f of [...(valeur.fileChanges.additions ?? []), ...(valeur.fileChanges.deletions ?? [])]) chemins.push(String(f.path ?? ''));
+    }
+    Object.values(valeur).forEach((v) => cheminsModifies(v, chemins));
+  }
+  return chemins;
+}
+
+// Editors: read anything, commit only content files, nothing else.
+function refusRedacteur(request, env, chemin, requete) {
+  const message = 'Action réservée aux administrateurs.';
+  if (chemin !== '/graphql') return ['GET', 'HEAD'].includes(request.method) ? null : message;
+  // Strings and comments removed, so "mutation" cannot hide behind them.
+  const q = String(requete?.query ?? '').replace(/"(?:[^"\\]|\\.)*"/g, '""').replace(/#[^\n]*/g, '');
+  if (!/\bmutation\b/.test(q)) return null;
+  // Only createCommitOnBranch, and only under the content folders.
+  const champs = q.match(/\b[a-zA-Z_]\w*\s*(?=\()/g) ?? [];
+  if (champs.some((c) => !['mutation', 'createCommitOnBranch', 'file'].includes(c.trim()))) return message;
+  const prefixes = (env.EDITOR_PATHS ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  const chemins = cheminsModifies(requete.variables);
+  if (chemins.some((c) => c.includes('..') || !prefixes.some((p) => c.startsWith(p)))) {
+    return chemins.includes(env.ACCESS_FILE) ? 'Seuls les administrateurs peuvent modifier la liste des accès.' : message;
+  }
+  return null;
+}
+
 async function relayer(request, env, chemin, session) {
   const entetes = new Headers({
     Authorization: `Bearer ${env.GITHUB_TOKEN}`,
@@ -140,14 +209,24 @@ async function relayer(request, env, chemin, session) {
     if (v) entetes.set(nom, v);
   }
   let corps = ['GET', 'HEAD'].includes(request.method) ? undefined : await request.text();
-  if (chemin === '/graphql' && corps) {
+  let requete = null;
+  if (chemin === '/graphql') {
     try {
-      const requete = JSON.parse(corps);
-      if (/createCommitOnBranch/.test(requete.query ?? '')) signer(requete.variables, session.email);
-      corps = JSON.stringify(requete);
+      requete = JSON.parse(corps ?? '');
     } catch {
       return json({ message: 'Requête invalide' }, 400);
     }
+  }
+  // The role is re-read on every call: a removal applies to open sessions too.
+  const role = await roleDe(session.email, env);
+  if (!role) return json({ message: 'Bad credentials' }, 401);
+  if (role !== 'administrateur') {
+    const refus = refusRedacteur(request, env, chemin, requete);
+    if (refus) return chemin === '/graphql' ? json({ errors: [{ message: refus }] }, 200) : json({ message: refus }, 403);
+  }
+  if (requete) {
+    if (/createCommitOnBranch/.test(requete.query ?? '')) signer(requete.variables, session.email);
+    corps = JSON.stringify(requete);
   }
   const url = new URL(request.url);
   const reponse = await fetch(`${GITHUB_API}${chemin}${url.search}`, { method: request.method, headers: entetes, body: corps });
