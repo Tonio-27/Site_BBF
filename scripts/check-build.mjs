@@ -10,7 +10,7 @@ const erreurs = [];
 const PAGES_CLES = [
   'index.html', '404.html', 'agenda/index.html', 'agenda/archives/index.html', 'agenda.ics',
   'blog/index.html', 'blog/rss.xml', 'presentation/index.html', 'gallery/index.html',
-  'partenaires/index.html', 'presse/index.html', 'contact/index.html',
+  'partenaires/index.html', 'soutenir/index.html', 'presse/index.html', 'contact/index.html',
   'politique-de-confidentialite/index.html', 'conditions-generales/index.html',
   'sitemap-index.xml', 'robots.txt', '.htaccess', 'admin/index.html', 'admin/config.yml', 'admin/sveltia-cms.js', 'admin/locales/fr.json',
 ];

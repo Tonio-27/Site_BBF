@@ -42,6 +42,8 @@ Rédacteur → /admin (Sveltia) → code par e-mail (Cloudflare Access) → Work
 - `public/.htaccess` : HTTPS, en-têtes de sécurité (CSP stricte), cache, redirections 301.
 - `public/admin/` : Sveltia CMS (copie locale épinglée, traductions et polices locales) + `config.yml` (menus en français, validé contre le schéma JSON de Sveltia).
 - `src/pages/admin/effectifs.astro` + `public/admin/effectifs/` : tableau « Effectifs » (glisser-déposer des musiciens par pupitre). Il lit et écrit les mêmes fichiers `src/content/musiciens/*.json` que Sveltia, via l'API GitHub (session Sveltia, un seul commit par enregistrement, refus si un fichier a changé entre-temps). En démo, il partage le bac à sable de Sveltia (stockage privé du navigateur).
+- `scripts/surveillance.mjs` + `.github/workflows/surveillance.yml` : disponibilité chaque heure, liens cassés chaque lundi ; une alerte ouvre un ticket GitHub (activation : variable `SURVEILLANCE=true`).
+- `src/pages/soutenir.astro` : membre soutien, don TWINT (code QR, lien de paiement, IBAN) et formules de sponsoring, tout modifiable dans l'admin (Pages → Nous soutenir).
 - `workers/cms-auth/` : Worker Cloudflare de connexion. Les rédacteurs se connectent par e-mail (Cloudflare Access), le Worker relaie les appels à GitHub avec le jeton du compte unique du BBF (jamais transmis au navigateur) et signe chaque commit de l'adresse du rédacteur. Qui peut entrer : `acces/redacteurs.json`, édité dans le CMS (Réglages → Accès à l'édition) ; un rédacteur n'enregistre que du contenu, un administrateur aussi la liste. Mise en place : `docs/RUNBOOK.md` (Admin).
 
 ### Règles

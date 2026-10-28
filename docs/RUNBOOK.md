@@ -67,6 +67,19 @@ Reporter l'URL du Worker dans `public/admin/config.yml` (`base_url`, `api_root`,
 
 Un administrateur : `/admin` → **Réglages → Accès à l'édition** → ajouter ou supprimer la ligne → **Enregistrer**. Un retrait coupe aussi une session ouverte, en une minute. Pour couper tout le monde immédiatement, changer `SESSION_SECRET` (commande ci-dessus).
 
+## Surveillance du site (alertes)
+
+`.github/workflows/surveillance.yml` vérifie **chaque heure** que le site répond (accueil et agenda, 3 essais) et **chaque lundi** qu'aucun lien n'est cassé (toutes les pages du plan du site, liens internes et externes ; les réseaux sociaux qui refusent les robots sont ignorés).
+
+- À activer à la mise en ligne : variable de dépôt `SURVEILLANCE` = `true` (et `SITE_URL` si l'adresse diffère).
+- Un problème ouvre un ticket GitHub (« Site inaccessible » ou « Liens cassés sur le site »), envoyé par e-mail au compte du BBF ; le ticket se ferme tout seul quand tout va bien. Un seul ticket par problème, pas de rappel chaque heure.
+- Faire suivre les e-mails de GitHub depuis it@ vers les administrateurs (règle de redirection dans kSuite).
+- Test à la main : **Actions → Surveillance → Run workflow**, ou `node scripts/surveillance.mjs liens https://brassbandfribourg.ch/`.
+
+## Statistiques de visite (sans cookie)
+
+Hébergement Infomaniak : Manager → Hébergement → le site → **Statistiques**. Elles sont calculées à partir des journaux du serveur : aucun cookie, rien à ajouter au site, pas de bandeau. Hébergement Cloudflare : *Web Analytics* du compte Cloudflare, également sans cookie.
+
 ## Restaurer un fichier supprimé (5 min)
 
 GitHub → dépôt `site-web` → **Commits** → trouver le commit `content: suppression …` → ouvrir le fichier supprimé → **View file** → copier → **Add file → Create new file** au même chemin. Ou en ligne de commande :

@@ -65,6 +65,10 @@ Pour un détail propre à un musicien (sa photo, par exemple), sa fiche individu
 1. **Photos → Nouveau** : titre, date, formation, photo de couverture (+ description).
 2. Dans **Photos**, ajoutez les images (plusieurs d'un coup possible). **60 au maximum** : l'album complet va sur le Drive du BBF, indiquez son lien dans « Lien vers l'album complet ».
 
+### Modifier la page « Nous soutenir »
+**Pages → Nous soutenir** : cotisation de membre soutien, texte du don, formules de sponsoring (nom, prix, avantages) et dossier PDF.
+Pour le don : téléversez l'image du **code QR TWINT** du BBF (fournie par TWINT ou la banque) et, si vous l'avez, le **lien de paiement TWINT** : il affiche un bouton « Payer avec TWINT » aux visiteurs sur téléphone. L'IBAN est facultatif.
+
 ### Changer l'ordre des partenaires ou du comité
 Dans **Partenaires** ou **Comité**, cliquez sur **Réorganiser** puis glissez les lignes dans l'ordre voulu.
 

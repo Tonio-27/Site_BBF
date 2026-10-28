@@ -19,6 +19,7 @@ export const collections = {
   accueil: defineCollection({ loader: page('accueil.json'), schema: ({ image }) => schemas.accueil(image) }),
   presentation: defineCollection({ loader: page('presentation.md'), schema: ({ image }) => schemas.presentation(image) }),
   page_partenaires: defineCollection({ loader: page('partenaires.json'), schema: () => schemas.page_partenaires() }),
+  page_soutenir: defineCollection({ loader: page('soutenir.json'), schema: ({ image }) => schemas.page_soutenir(image) }),
   page_presse: defineCollection({ loader: page('presse.json'), schema: ({ image }) => schemas.page_presse(image) }),
   reglages: defineCollection({ loader: page('reglages.json'), schema: ({ image }) => schemas.reglages(image) }),
 };

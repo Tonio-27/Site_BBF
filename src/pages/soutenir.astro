@@ -1,0 +1,111 @@
+---
+// "Nous soutenir": supporting membership, donations (TWINT QR, payment link,
+// bank transfer) and sponsorship packages. Content: src/content/pages/soutenir.json.
+import { getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Email from '../components/Email.astro';
+
+const page = (await getEntry('page_soutenir', 'soutenir'))!.data;
+const { membre, don, sponsoring } = page;
+---
+<Base titre="Nous soutenir" description="Devenir membre soutien, faire un don par TWINT ou soutenir le Brass Band Fribourg comme entreprise.">
+  <BandeauPage titre="Nous soutenir" surtitre="Merci !" intro={page.introduction}>
+    <ul class="raccourcis">
+      <li><a class="bouton" href="#membre">Devenir membre</a></li>
+      <li><a class="bouton bouton--contour" href="#don">Faire un don</a></li>
+      <li><a class="bouton bouton--contour" href="#sponsoring">Sponsoring</a></li>
+    </ul>
+  </BandeauPage>
+
+  <section class="section" id="membre" aria-labelledby="t-membre">
+    <div class="conteneur deux-col">
+      <div>
+        <p class="surtitre">Particuliers</p>
+        <h2 id="t-membre">Devenir membre soutien</h2>
+        <p>{membre.texte}</p>
+        {membre.avantages.length > 0 && <ul class="coches">{membre.avantages.map((a) => <li>{a}</li>)}</ul>}
+      </div>
+      <div class="carte-prix">
+        <p class="carte-prix__montant">{membre.montant}</p>
+        <p>Pour adhérer, écrivez-nous :</p>
+        <p class="carte-prix__email"><Email adresse={page.email} /></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--gris" id="don" aria-labelledby="t-don">
+    <div class="conteneur deux-col">
+      <div>
+        <p class="surtitre">Montant libre</p>
+        <h2 id="t-don">Faire un don</h2>
+        <p>{don.texte}</p>
+        {don.qr_twint && (
+          <ol class="etapes">
+            <li>Ouvrez l’application TWINT.</li>
+            <li>Touchez « Scanner » et visez le code.</li>
+            <li>Choisissez le montant et confirmez.</li>
+          </ol>
+        )}
+        {don.lien_twint && <p><a class="bouton" href={don.lien_twint} rel="noopener">Payer avec TWINT</a></p>}
+        {don.iban && (
+          <p class="virement">Par virement : <strong>{don.beneficiaire}</strong><br />IBAN <span class="iban">{don.iban}</span></p>
+        )}
+      </div>
+      {don.qr_twint && (
+        <figure class="qr">
+          <Image src={don.qr_twint.src} alt={don.qr_twint.alt} width={260} height={260} />
+          <figcaption>Scannez avec l’application TWINT</figcaption>
+        </figure>
+      )}
+    </div>
+  </section>
+
+  <section class="section section--noir" id="sponsoring" aria-labelledby="t-sponsoring">
+    <div class="conteneur">
+      <p class="surtitre">Entreprises</p>
+      <h2 id="t-sponsoring">Devenir partenaire</h2>
+      <p class="sponsoring__intro">{sponsoring.texte}</p>
+      <ul class="formules">
+        {sponsoring.formules.map((f, i) => (
+          <li class:list={['formule', { 'formule--phare': i === sponsoring.formules.length - 1 }]}>
+            <h3>{f.nom}</h3>
+            <p class="formule__prix">{f.prix}</p>
+            <ul class="coches">{f.avantages.map((a) => <li>{a}</li>)}</ul>
+          </li>
+        ))}
+      </ul>
+      <p class="sponsoring__contact">
+        Intéressé ? Écrivez-nous : <Email adresse={page.email} />
+        {sponsoring.dossier && <a class="bouton bouton--contour" href={sponsoring.dossier} download>Dossier de sponsoring (PDF)</a>}
+      </p>
+    </div>
+  </section>
+</Base>
+<style>
+  .raccourcis { list-style: none; padding: 0; margin: var(--e-4) 0 0; display: flex; flex-wrap: wrap; gap: var(--e-2); }
+  .deux-col { display: grid; gap: var(--e-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); align-items: center; }
+  .coches { list-style: none; padding: 0; margin: var(--e-3) 0 0; }
+  .coches li { padding-left: 1.6rem; position: relative; margin-bottom: var(--e-2); }
+  .coches li::before { content: '✓'; position: absolute; left: 0; color: var(--rouge); font-weight: 700; }
+  .carte-prix { background: var(--blanc); border-radius: var(--rayon-lg); box-shadow: var(--ombre); border-top: 4px solid var(--rouge); padding: var(--e-5); text-align: center; }
+  .carte-prix__montant { font-family: var(--police-titres); font-size: var(--t-2xl); font-weight: 700; margin-bottom: var(--e-3); }
+  .carte-prix__email { font-weight: 700; font-size: 1.1rem; }
+  .etapes { padding-left: 1.3rem; }
+  .etapes li { margin-bottom: var(--e-1); }
+  .virement { margin-top: var(--e-3); }
+  .iban { font-family: var(--police-mono, monospace); white-space: nowrap; }
+  .qr { margin: 0; justify-self: center; text-align: center; background: var(--blanc); border-radius: var(--rayon-lg); box-shadow: var(--ombre); padding: var(--e-4); }
+  .qr img { width: 13rem; height: auto; display: block; margin: 0 auto; }
+  .qr figcaption { margin-top: var(--e-2); font-size: var(--t-sm); }
+  .sponsoring__intro { max-width: 42rem; color: #d6d6d6; }
+  .formules { list-style: none; padding: 0; margin: var(--e-5) 0 0; display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .formule { border: 1px solid var(--gris-fonce); border-top: 4px solid var(--rouge); border-radius: var(--rayon-lg); padding: var(--e-4); }
+  .formule--phare { background: #1c1c1c; border-color: var(--rouge); }
+  .formule h3 { font-size: var(--t-lg); margin-bottom: var(--e-1); }
+  .formule__prix { font-family: var(--police-titres); font-weight: 700; font-size: 1.25rem; color: var(--blanc); }
+  .formule .coches li { color: #d6d6d6; }
+  .formule .coches li::before { color: var(--rouge-clair); }
+  .sponsoring__contact { margin-top: var(--e-5); display: flex; flex-wrap: wrap; gap: var(--e-3); align-items: center; }
+</style>

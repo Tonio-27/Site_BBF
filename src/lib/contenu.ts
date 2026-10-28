@@ -7,7 +7,7 @@ export type Evenement = CollectionEntry<'evenements'>;
 
 // Root-level article slugs must not shadow real pages.
 const SLUGS_RESERVES = new Set([
-  'agenda', 'blog', 'presentation', 'gallery', 'contact', 'partenaires', 'presse', 'admin',
+  'agenda', 'blog', 'presentation', 'gallery', 'contact', 'partenaires', 'presse', 'soutenir', 'admin',
   'politique-de-confidentialite', 'conditions-generales', '404', 'app', 'documents', 'js', 'fonts', '_astro',
 ]);
 

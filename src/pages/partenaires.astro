@@ -10,7 +10,7 @@ const page = (await getEntry('page_partenaires', 'partenaires'))!.data;
 const partenaires = await partenairesActifs();
 const categories = CATEGORIES_PARTENAIRE.map((c) => ({ c, liste: partenaires.filter((p) => p.data.categorie === c) })).filter((x) => x.liste.length);
 ---
-<Base titre="Partenaires" description="Les partenaires et sponsors du Brass Band Fribourg, et comment nous soutenir.">
+<Base titre="Partenaires" description="Les partenaires et sponsors du Brass Band Fribourg.">
   <BandeauPage titre="Partenaires" surtitre="Merci !" intro={page.remerciements} />
   {categories.map(({ c, liste }, i) => (
     <section class:list={['section', { 'section--gris': i % 2 }]} aria-labelledby={`cat-${i}`}>
@@ -30,19 +30,12 @@ const categories = CATEGORIES_PARTENAIRE.map((c) => ({ c, liste: partenaires.fil
       </div>
     </section>
   ))}
-  <section class="section section--noir" id="soutenir" aria-labelledby="t-soutenir">
-    <div class="conteneur">
+  <section class="section section--noir" aria-labelledby="t-soutenir">
+    <div class="conteneur appel-soutien">
       <p class="surtitre">Nous soutenir</p>
-      <h2 id="t-soutenir">Rejoignez nos soutiens</h2>
-      <div class="offres">
-        {page.offres.map((o) => (
-          <div class="offre">
-            <h3>{o.titre}</h3>
-            <p>{o.texte}</p>
-            {o.pdf ? <a class="bouton" href={o.pdf} download>Télécharger le dossier (PDF)</a> : <a class="bouton" href="/contact/">Nous contacter</a>}
-          </div>
-        ))}
-      </div>
+      <h2 id="t-soutenir">Votre entreprise à nos côtés</h2>
+      <p>Plusieurs formules de sponsoring, adaptées à chaque budget.</p>
+      <a class="bouton" href="/soutenir/#sponsoring">Voir les formules</a>
     </div>
   </section>
 </Base>
@@ -50,7 +43,5 @@ const categories = CATEGORIES_PARTENAIRE.map((c) => ({ c, liste: partenaires.fil
   .logos { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
   .logos li { background: var(--blanc); border-radius: var(--rayon-lg); padding: var(--e-3); box-shadow: var(--ombre); }
   .logos a { display: block; }
-  .offres { display: grid; gap: var(--e-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); margin-top: var(--e-4); }
-  .offre { border: 1px solid var(--gris-fonce); border-top: 4px solid var(--rouge); border-radius: var(--rayon-lg); padding: var(--e-4); }
-  .offre p { color: #d6d6d6; }
+  .appel-soutien p:not(.surtitre) { color: #d6d6d6; }
 </style>

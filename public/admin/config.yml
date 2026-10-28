@@ -430,14 +430,52 @@ collections:
         file: src/content/pages/partenaires.json
         fields:
           - { name: remerciements, label: Texte de remerciement, widget: text }
-          - name: offres
-            label: Offres de soutien
-            label_singular: Offre
-            widget: list
+      - name: soutenir
+        label: Nous soutenir (membres, dons, sponsoring)
+        file: src/content/pages/soutenir.json
+        media_folder: /src/assets/uploads
+        public_folder: ../../assets/uploads
+        fields:
+          - { name: introduction, label: Introduction, widget: text }
+          - { name: email, label: E-mail pour les demandes, widget: string, type: email, hint: "Adhésions et sponsoring. Ex. caisse@brassbandfribourg.ch" }
+          - name: membre
+            label: Membre soutien
+            widget: object
             fields:
-              - { name: titre, label: Titre, widget: string }
               - { name: texte, label: Texte, widget: text }
-              - { name: pdf, label: Dossier PDF, widget: file, required: false, media_folder: /public/documents, public_folder: /documents }
+              - { name: montant, label: Cotisation, widget: string, hint: "Ex. CHF 50.– par an" }
+              - { name: avantages, label: Avantages, label_singular: avantage, widget: list, field: { name: avantage, label: Avantage, widget: string } }
+          - name: don
+            label: Don
+            widget: object
+            fields:
+              - { name: texte, label: Texte, widget: text }
+              - name: qr_twint
+                label: Code QR TWINT
+                widget: object
+                required: false
+                hint: "L'image du code QR de dons fournie par TWINT ou la banque du BBF."
+                fields:
+                  - { name: src, label: Image, widget: image }
+                  - { name: alt, label: Description, widget: string, default: "Code QR TWINT pour faire un don au Brass Band Fribourg" }
+              - { name: lien_twint, label: Lien de paiement TWINT, widget: string, type: url, required: false, hint: "Bouton « Payer avec TWINT » pour les visiteurs sur téléphone." }
+              - { name: beneficiaire, label: Bénéficiaire (virement), widget: string, required: false }
+              - { name: iban, label: IBAN (virement), widget: string, required: false }
+          - name: sponsoring
+            label: Sponsoring
+            widget: object
+            fields:
+              - { name: texte, label: Texte, widget: text }
+              - name: formules
+                label: Formules
+                label_singular: formule
+                widget: list
+                summary: "{{fields.nom}} — {{fields.prix}}"
+                fields:
+                  - { name: nom, label: Nom, widget: string }
+                  - { name: prix, label: Prix, widget: string, hint: "Ex. CHF 500.– par an" }
+                  - { name: avantages, label: Avantages, label_singular: avantage, widget: list, field: { name: avantage, label: Avantage, widget: string } }
+              - { name: dossier, label: Dossier de sponsoring (PDF), widget: file, required: false, media_folder: /public/documents, public_folder: /documents }
       - name: presse
         label: Presse (textes et kit)
         file: src/content/pages/presse.json

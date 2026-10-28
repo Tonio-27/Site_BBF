@@ -139,7 +139,29 @@ export const schemas = {
   page_partenaires: () =>
     z.object({
       remerciements: texteRequis,
-      offres: z.array(z.object({ titre: texteRequis, texte: texteRequis, pdf: z.string().optional() })).default([]),
+    }),
+
+  page_soutenir: <I extends z.ZodType>(image: () => I) =>
+    z.object({
+      introduction: texteRequis,
+      email: z.email(),
+      membre: z.object({
+        texte: texteRequis,
+        montant: texteRequis,
+        avantages: z.array(texteRequis).default([]),
+      }),
+      don: z.object({
+        texte: texteRequis,
+        qr_twint: imageAvecAlt(image).optional(),
+        lien_twint: url.optional(),
+        beneficiaire: z.string().optional(),
+        iban: z.string().optional(),
+      }),
+      sponsoring: z.object({
+        texte: texteRequis,
+        formules: z.array(z.object({ nom: texteRequis, prix: texteRequis, avantages: z.array(texteRequis).min(1) })).default([]),
+        dossier: z.string().optional(),
+      }),
     }),
 
   page_presse: <I extends z.ZodType>(image: () => I) =>

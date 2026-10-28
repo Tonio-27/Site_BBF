@@ -1,0 +1,26 @@
+{
+  "introduction": "Concerts, concours, formation de la relève : le Brass Band Fribourg vit grâce à son public, ses membres soutiens et ses partenaires. Chaque soutien compte.",
+  "email": "caisse@brassbandfribourg.ch",
+  "membre": {
+    "texte": "Devenez membre soutien et suivez le BBF de plus près, saison après saison.",
+    "montant": "CHF 50.– par an",
+    "avantages": [
+      "Une invitation au concert annuel",
+      "Nos nouvelles avant tout le monde",
+      "Votre nom dans le programme du concert annuel (si vous le souhaitez)"
+    ]
+  },
+  "don": {
+    "texte": "Un don, même modeste, aide à financer les partitions, les déplacements aux concours et la formation des jeunes musiciens.",
+    "qr_twint": { "src": "../../assets/uploads/twint-qr-exemple.svg", "alt": "Code QR TWINT pour faire un don au Brass Band Fribourg (exemple)" },
+    "beneficiaire": "Brass Band Fribourg"
+  },
+  "sponsoring": {
+    "texte": "Associez votre entreprise à un ensemble de référence en Suisse romande et touchez un public fidèle, à chaque concert et toute l'année sur nos supports.",
+    "formules": [
+      { "nom": "Ami", "prix": "CHF 300.– par an", "avantages": ["Logo sur notre site", "Mention dans le programme du concert annuel"] },
+      { "nom": "Partenaire", "prix": "CHF 1'000.– par an", "avantages": ["Logo sur notre site et nos affiches", "Annonce dans le programme du concert annuel", "2 invitations au concert annuel"] },
+      { "nom": "Partenaire principal", "prix": "Dès CHF 3'000.– par an", "avantages": ["Logo en tête de nos supports et sur scène", "Page entière dans le programme", "Concert ou animation pour votre entreprise", "6 invitations au concert annuel"] }
+    ]
+  }
+}

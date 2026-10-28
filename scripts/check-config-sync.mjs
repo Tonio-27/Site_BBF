@@ -35,6 +35,7 @@ const correspondances = {
   'pages/accueil': 'accueil',
   'pages/presentation': 'presentation',
   'pages/partenaires': 'page_partenaires',
+  'pages/soutenir': 'page_soutenir',
   'pages/presse': 'page_presse',
   'pages/confidentialite': 'legal',
   'pages/conditions': 'legal',
